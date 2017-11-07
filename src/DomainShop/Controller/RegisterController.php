@@ -42,7 +42,7 @@ final class RegisterController implements MiddlewareInterface
             throw new \RuntimeException('Invalid domain name provided');
         }
 
-        if (isset($submittedData['name'], $submittedData['email_address'])) {
+        if (isset($submittedData['register'])) {
             if (empty($submittedData['name'])) {
                 $formErrors['name'][] = 'Please fill in your name';
             }
@@ -52,17 +52,20 @@ final class RegisterController implements MiddlewareInterface
 
             if (empty($formErrors)) {
                 $orderId = count(Database::retrieveAll(Order::class)) + 1;
+
                 $order = new Order();
                 $order->setId($orderId);
                 $order->setDomainName($submittedData['domain_name']);
                 $order->setOwnerName($submittedData['name']);
                 $order->setOwnerEmailAddress($submittedData['email_address']);
+                $order->setPayInCurrency($submittedData['currency']);
+
                 Database::persist($order);
 
                 return new RedirectResponse(
                     $this->router->generateUri(
                         'pay',
-                        ['orderId' => 1]
+                        ['orderId' => $order->id()]
                     )
                 );
             }

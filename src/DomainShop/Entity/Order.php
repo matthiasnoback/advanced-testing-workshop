@@ -26,6 +26,11 @@ final class Order
     private $ownerEmailAddress;
 
     /**
+     * @var string
+     */
+    private $payInCurrency;
+
+    /**
      * @var bool
      */
     private $wasPaid = false;
@@ -84,5 +89,15 @@ final class Order
     {
         $parts = explode('.', $this->getDomainName());
         return '.' . $parts[1];
+    }
+
+    public function setPayInCurrency(string $currency): void
+    {
+        $this->payInCurrency = $currency;
+    }
+
+    public function getPayInCurrency(): string
+    {
+        return $this->payInCurrency;
     }
 }

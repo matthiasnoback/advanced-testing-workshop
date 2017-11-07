@@ -21,8 +21,19 @@
                 <span class="help-block">{{ error }}</span>
             {% endfor %}
         </div>
+        <div class="form-group{% if formErrors["payInCurrency"] is defined %} has-error{% endif %}">
+            <label class="control-label" for="currency">Pay in payInCurrency:</label>
+            <select class="form-control" id="currency" name="currency">
+                <option value="EUR">EUR</option>
+                <option value="USD">USD</option>
+                <option value="GBP">GBP</option>
+            </select>
+            {% for error in formErrors["payInCurrency"]|default({}) %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        </div>
 
-        <button type="submit" class="btn btn-primary">Buy this domain name</button>
+        <button type="submit" class="btn btn-primary" name="register">Buy this domain name</button>
     </form>
 
 {% endblock %}
