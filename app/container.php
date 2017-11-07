@@ -42,6 +42,14 @@ $container['config'] = [
         ],
     ],
     'debug' => true,
+    'final_handler' => [
+        'options' => [
+            'env' => 'development',
+            'onerror' => function(\Throwable $throwable) {
+                error_log((string)$throwable);
+            }
+        ]
+    ],
     'templates' => [
         'extension' => 'html.twig',
         'paths' => [
@@ -96,13 +104,6 @@ $container['config'] = [
 /*
  * Zend Expressive Application
  */
-$container['Zend\Expressive\FinalHandler'] = function () {
-    return function (RequestInterface $request, ResponseInterface $response, $err = null) {
-        if ($err instanceof \Throwable) {
-            throw $err;
-        }
-    };
-};
 $container[RouterInterface::class] = function () {
     return new FastRouteRouter();
 };
