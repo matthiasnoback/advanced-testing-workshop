@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\EndToEnd;
+namespace Test\System;
 
 use Behat\Mink\Driver\GoutteDriver;
 use Behat\MinkExtension\Context\MinkContext;

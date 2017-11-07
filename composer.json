@@ -41,7 +41,7 @@
         "psr-4": {
             "Test\\Integration\\": "test/Integration",
             "Test\\Acceptance\\": "test/Acceptance",
-            "Test\\EndToEnd\\": "test/EndToEnd",
+            "Test\\System\\": "test/System",
             "": "test/Unit"
         }
     }

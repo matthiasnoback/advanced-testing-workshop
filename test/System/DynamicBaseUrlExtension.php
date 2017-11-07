@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Test\EndToEnd;
+namespace Test\System;
 
 use Behat\Testwork\ServiceContainer\Extension;
 use Behat\Testwork\ServiceContainer\ExtensionManager;

@@ -1,6 +1,6 @@
 default:
     extensions:
-        Test\EndToEnd\DynamicBaseUrlExtension: ~
+        Test\System\DynamicBaseUrlExtension: ~
         Behat\MinkExtension:
             base_url:  'http://%web_hostname%:8080/'
             sessions:
@@ -9,10 +9,10 @@ default:
     suites:
         end_to_end:
             mink_session: default
-            paths: [ "%paths.base%/test/EndToEnd/features"]
+            paths: [ "%paths.base%/test/System/features"]
             contexts:
-                - Test\EndToEnd\FeatureContext
-        end_to_end:
+                - Test\System\FeatureContext
+        acceptance:
             paths: [ "%paths.base%/test/Acceptance/features"]
             contexts:
                 - Test\Acceptance\FeatureContext
