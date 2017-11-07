@@ -37,6 +37,9 @@ final class CheckAvailabilityController implements MiddlewareInterface
         $parser = new Parser();
         $parser->throwExceptions(true);
         $result = $parser->lookup($domainName);
+        if ($result->name !== $domainName) {
+            throw new \RuntimeException('Invalid domain name');
+        }
 
         $isAvailable = !$result->registered;
 
