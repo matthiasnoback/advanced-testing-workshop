@@ -8,8 +8,6 @@ use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
 use DomainShop\Resources\Views\TwigTemplates;
 use Interop\Container\ContainerInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Debug\Debug;
 use Xtreamwayz\Pimple\Container;
 use Zend\Diactoros\Response;
@@ -123,7 +121,7 @@ $container[UrlHelper::class] = function (ContainerInterface $container) {
     return new UrlHelper($container[RouterInterface::class]);
 };
 
-/**
+/*
  * Controllers
  */
 $container[HomepageController::class] = function (ContainerInterface $container) {
@@ -146,11 +144,10 @@ $container[PayController::class] = function (ContainerInterface $container) {
 };
 $container[FinishController::class] = function (ContainerInterface $container) {
     return new FinishController(
-        $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class)
     );
 };
-$container[SetPriceController::class] = function (ContainerInterface $container) {
+$container[SetPriceController::class] = function () {
     return new SetPriceController();
 };
 

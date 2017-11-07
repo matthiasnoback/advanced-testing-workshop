@@ -10,11 +10,11 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class DynamicBaseUrlExtension implements Extension
 {
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
     }
 
-    public function getConfigKey()
+    public function getConfigKey(): string
     {
         return 'dynamic_base_url';
     }

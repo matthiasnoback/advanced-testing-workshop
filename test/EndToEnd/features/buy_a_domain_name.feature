@@ -31,7 +31,7 @@ Feature:
     And I press "Register it now"
     When I fill in the following:
       | Name          |                      |
-      | Email address | invalid-emailaddress |
+      | Email address | invalid-email-address |
     And I press "Buy this domain name"
     Then I should see "Please fill in your name"
     And I should see "Please fill in a valid email address"

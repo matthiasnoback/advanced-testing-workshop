@@ -3,17 +3,19 @@
 namespace Test\EndToEnd;
 
 use Behat\Mink\Driver\GoutteDriver;
-use Behat\Mink\Mink;
 use Behat\MinkExtension\Context\MinkContext;
 
 final class FeatureContext extends MinkContext
 {
     /**
      * @Given /^a "([^"]*)" domain name costs "([^"]*)"$/
+     *
+     * @param string $extension
+     * @param string $price
      */
     public function aDomainNameCosts($extension, $price)
     {
-        list($currency, $amount) = explode(' ', $price);
+        [$currency, $amount] = explode(' ', $price);
         $amount = round((float)$amount * 100);
 
         /** @var GoutteDriver $driver */
