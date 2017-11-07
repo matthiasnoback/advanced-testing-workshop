@@ -25,6 +25,7 @@ Debug::enable();
 
 $container = new Container();
 
+$applicationEnv = getenv('ENV') ?: 'development';
 $container['config'] = [
     'middleware_pipeline' => [
         'routing' => [
@@ -39,10 +40,10 @@ $container['config'] = [
             'priority' => -1,
         ],
     ],
-    'debug' => true,
+    'debug' => $applicationEnv !== 'production',
     'final_handler' => [
         'options' => [
-            'env' => 'development',
+            'env' => $applicationEnv,
             'onerror' => function(\Throwable $throwable) {
                 error_log((string)$throwable);
             }
@@ -55,8 +56,8 @@ $container['config'] = [
         ]
     ],
     'twig' => [
-        'extensions' => [
-
+        'globals' => [
+            'applicationEnv' => $applicationEnv
         ]
     ],
     'routes' => [
