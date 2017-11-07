@@ -1,0 +1,17 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+    <h1>Register your domain name now!</h1>
+
+    <form method="post" action="{{ url('check_availability') }}" enctype="multipart/form-data">
+        <div class="form-group{% if formErrors["name"] is defined %} has-error{% endif %}">
+            <label class="control-label" for="domain_name">Domain name:</label>
+            <input class="form-control" id="domain_name" name="domain_name" type="text" value="{{ submittedData["domain_name"]|default("") }}"/>
+            {% for error in formErrors["domain_name"]|default({}) %}
+                <span class="help-block">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <button type="submit"class="btn btn-default">Check availability</button>
+    </form>
+{% endblock %}

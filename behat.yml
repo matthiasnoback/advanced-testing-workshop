@@ -1,0 +1,18 @@
+default:
+    extensions:
+        Behat\MinkExtension:
+            base_url:  'http://localhost:8080/'
+            sessions:
+                default:
+                    goutte: ~
+    suites:
+        end_to_end:
+            mink_session: default
+            paths: [ "%paths.base%/test/EndToEnd/features"]
+            contexts:
+                - Test\EndToEnd\FeatureContext
+                - Behat\MinkExtension\Context\MinkContext
+        end_to_end:
+            paths: [ "%paths.base%/test/Acceptance/features"]
+            contexts:
+                - Test\Acceptance\FeatureContext

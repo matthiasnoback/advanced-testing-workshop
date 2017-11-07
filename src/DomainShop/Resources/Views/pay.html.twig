@@ -1,0 +1,11 @@
+{% extends "base.html.twig" %}
+
+{% block content %}
+    <h1>Pay for {{ domainName }}</h1>
+
+    <h2>Amount: <b>€{{ (orderAmount / 100)|number_format(2, ',', '.') }}</b></h2>
+
+    <form method="post" action="{{ url('pay', { orderId: orderId }) }}" enctype="multipart/form-data">
+        <button type="submit"class="btn btn-success">Pay</button>
+    </form>
+{% endblock %}
