@@ -10,6 +10,7 @@
     </testsuites>
     <filter>
         <whitelist>
+            <directory>app/</directory>
             <directory>src/</directory>
         </whitelist>
     </filter>

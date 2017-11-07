@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "71d73d533f5a2ea896fb094ab4687990",
+    "content-hash": "0ccd6d6e00f3422349df798bfc0fbce2",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -3482,6 +3482,40 @@
                 "webtest"
             ],
             "time": "2017-06-30T04:02:48+00:00"
+        },
+        {
+            "name": "matthiasnoback/live-code-coverage",
+            "version": "v0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/matthiasnoback/live-code-coverage.git",
+                "reference": "8bca6731e8ac022910c480f45c2200c60ad0bd11"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/matthiasnoback/live-code-coverage/zipball/8bca6731e8ac022910c480f45c2200c60ad0bd11",
+                "reference": "8bca6731e8ac022910c480f45c2200c60ad0bd11",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7.0",
+                "phpunit/php-code-coverage": "^4.0 || ^5.2",
+                "phpunit/phpunit": "^5.7 || ^6.0",
+                "webmozart/assert": "^1.2"
+            },
+            "require-dev": {
+                "symfony/filesystem": "^3.3",
+                "symfony/finder": "^3.3",
+                "symfony/process": "^3.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "time": "2017-10-28T08:02:01+00:00"
         },
         {
             "name": "myclabs/deep-copy",

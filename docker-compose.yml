@@ -15,13 +15,13 @@ services:
         user: ${HOST_UID}:${HOST_GID}
 
     devtools:
-        image: matthiasnoback/php_workshop_tools_base
+        build: docker/devtools/
+        image: matthiasnoback/advanced_testing_workshop_devtools
         volumes:
             - ./:/opt
             - ${COMPOSER_HOME}:/home/.composer
         environment:
             COMPOSER_HOME: /home/.composer
             XDEBUG_CONFIG: "remote_host=${DOCKER_HOST_IP}"
-        depends_on:
-            - web
+            WEB_HOSTNAME: web
         user: ${HOST_UID}:${HOST_GID}

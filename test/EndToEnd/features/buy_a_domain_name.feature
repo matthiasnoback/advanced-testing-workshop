@@ -28,12 +28,24 @@ Feature:
     Given I am on the homepage
     When I fill in "Domain name" with "totallyrandomdomainname.com"
     And I press "Check availability"
-    Then I should see "totallyrandomdomainname.com is still available"
-    When I press "Register it now"
-    Then I should see "Fill in your details"
+    And I press "Register it now"
     When I fill in the following:
       | Name          |                      |
       | Email address | invalid-emailaddress |
     And I press "Buy this domain name"
     Then I should see "Please fill in your name"
     And I should see "Please fill in a valid email address"
+
+  Scenario: Pay in a different currency
+    Given I am on the homepage
+    And I fill in "Domain name" with "totallyrandomdomainname.com"
+    And I press "Check availability"
+    And I should see "totallyrandomdomainname.com is still available"
+    And I press "Register it now"
+    When I fill in the following:
+      | Name            | Matthias                  |
+      | Email address   | matthiasnoback@gmail.com  |
+      | Pay in currency | USD                       |
+    And I press "Buy this domain name"
+    Then I should see "Pay for totallyrandomdomainname.com"
+    And I should see "Amount: USD 11.56"

@@ -10,7 +10,8 @@
         "phpunit/phpunit": "^5.3",
         "behat/mink-extension": "^2.2",
         "behat/mink-selenium2-driver": "^1.3",
-        "symfony/var-dumper": "^3.3"
+        "symfony/var-dumper": "^3.3",
+        "matthiasnoback/live-code-coverage": "^0.1.0"
     },
     "require": {
         "php": "^7.1",
