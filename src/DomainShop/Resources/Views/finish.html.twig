@@ -1,5 +1,9 @@
 {% extends "base.html.twig" %}
 
 {% block content %}
-    <h1>You are now the owner of <b>totallyrandomdomainname.com</b></h1>
+    {% if wasPaid %}
+        <h2 class="alert alert-success">You are now the owner of <b>totallyrandomdomainname.com</b></h2>
+    {% else %}
+        <h2 class="alert alert-danger">Warning: we didn't receive a payment yet.</h2>
+    {% endif %}
 {% endblock %}

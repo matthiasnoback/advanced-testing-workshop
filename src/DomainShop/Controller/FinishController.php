@@ -37,7 +37,8 @@ final class FinishController implements MiddlewareInterface
         $order = Database::retrieve(Order::class, (string)$orderId);
 
         $response->getBody()->write($this->renderer->render('finish.html.twig', [
-            'domainName' => $order->getDomainName()
+            'domainName' => $order->getDomainName(),
+            'wasPaid' => $order->wasPaid()
         ]));
     }
 }

@@ -41,6 +41,12 @@ final class PayController implements MiddlewareInterface
         $orderAmount = 1000;
 
         if ($request->getMethod() === 'POST') {
+            $submittedData = $request->getParsedBody();
+            if (isset($submittedData['pay'])) {
+                $order->setWasPaid(true);
+                Database::persist($order);
+            }
+
             return new RedirectResponse(
                 $this->router->generateUri('finish', ['orderId' => $orderId])
             );
