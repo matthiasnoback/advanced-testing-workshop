@@ -23,17 +23,27 @@ final class CheckAvailabilityController implements MiddlewareInterface
 
     public function __invoke(Request $request, Response $response, callable $out = null)
     {
-        $formData = $request->getParsedBody();
-        $domainName = $formData['domain_name'];
+        $submittedData = $request->getParsedBody();
+
+        if (!isset($submittedData['domain_name'])) {
+            throw new \RuntimeException('No domain name provided');
+        }
+        if (!preg_match('/^\w+\.\w+$/', $submittedData['domain_name'])) {
+            throw new \RuntimeException('Invalid domain name provided');
+        }
+
+        $domainName = $submittedData['domain_name'];
 
         $parser = new Parser();
+        $parser->throwExceptions(true);
         $result = $parser->lookup($domainName);
 
         $isAvailable = !$result->registered;
 
         $response->getBody()->write($this->renderer->render('availability.html.twig', [
             'isAvailable' => $isAvailable,
-            'domainName' => $domainName
+            'domainName' => $domainName,
+            'whoisResult' => $result
         ]));
 
         return $response;

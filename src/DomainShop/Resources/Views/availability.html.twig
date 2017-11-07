@@ -10,5 +10,7 @@
 
     {% else %}
         <h2 class="alert alert-warning">We're sorry! <b>{{ domainName }}</b> is not available anymore.</h2>
+
+        {{ dump(whoisResult) }}
     {% endif %}
 {% endblock %}

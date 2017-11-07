@@ -33,28 +33,45 @@ final class RegisterController implements MiddlewareInterface
     public function __invoke(Request $request, Response $response, callable $out = null)
     {
         $submittedData = $request->getParsedBody();
+        $formErrors = [];
+
+        if (!isset($submittedData['domain_name'])) {
+            throw new \RuntimeException('No domain name provided');
+        }
+        if (!preg_match('/^\w+\.\w+$/', $submittedData['domain_name'])) {
+            throw new \RuntimeException('Invalid domain name provided');
+        }
 
         if (isset($submittedData['name'], $submittedData['email_address'])) {
-            // the form has been submitted
-            // TODO store order
-            $orderId = count(Database::retrieveAll(Order::class)) + 1;
-            $order = new Order();
-            $order->setId($orderId);
-            $order->setDomainName($submittedData['domain_name']);
-            $order->setOwnerName($submittedData['name']);
-            $order->setOwnerEmailAddress($submittedData['email_address']);
-            Database::persist($order);
+            if (empty($submittedData['name'])) {
+                $formErrors['name'][] = 'Please fill in your name';
+            }
+            if (!filter_var($submittedData['email_address'], FILTER_VALIDATE_EMAIL)) {
+                $formErrors['email_address'][] = 'Please fill in a valid email address';
+            }
 
-            return new RedirectResponse(
-                $this->router->generateUri(
-                    'pay',
-                    ['orderId' => 1]
-                )
-            );
+            if (empty($formErrors)) {
+                $orderId = count(Database::retrieveAll(Order::class)) + 1;
+                $order = new Order();
+                $order->setId($orderId);
+                $order->setDomainName($submittedData['domain_name']);
+                $order->setOwnerName($submittedData['name']);
+                $order->setOwnerEmailAddress($submittedData['email_address']);
+                Database::persist($order);
+
+                return new RedirectResponse(
+                    $this->router->generateUri(
+                        'pay',
+                        ['orderId' => 1]
+                    )
+                );
+            }
         }
 
         $response->getBody()->write($this->renderer->render('register.html.twig', [
-            'domainName' => $submittedData['domain_name']
+            'domainName' => $submittedData['domain_name'],
+            'formErrors' => $formErrors,
+            'submittedData' => $submittedData
         ]));
 
         return $response;
