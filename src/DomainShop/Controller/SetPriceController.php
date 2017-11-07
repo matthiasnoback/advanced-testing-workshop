@@ -5,7 +5,6 @@ namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
 use DomainShop\Entity\Pricing;
-use Novutec\WhoisParser\Templates\Pr;
 use Zend\Stratigility\MiddlewareInterface;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;

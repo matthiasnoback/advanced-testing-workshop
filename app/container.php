@@ -11,8 +11,8 @@ use Interop\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Debug\Debug;
-use Symfony\Component\Debug\ErrorHandler;
 use Xtreamwayz\Pimple\Container;
+use Zend\Diactoros\Response;
 use Zend\Expressive\Application;
 use Zend\Expressive\Container\ApplicationFactory;
 use Zend\Expressive\Helper\ServerUrlHelper;
@@ -21,13 +21,26 @@ use Zend\Expressive\Router\FastRouteRouter;
 use Zend\Expressive\Router\RouterInterface;
 use Zend\Expressive\Template\TemplateRendererInterface;
 use Zend\Expressive\Twig\TwigRendererFactory;
+use Zend\Stratigility\Middleware\NotFoundHandler;
 
 Debug::enable();
-ErrorHandler::register();
 
 $container = new Container();
 
 $container['config'] = [
+    'middleware_pipeline' => [
+        'routing' => [
+            'middleware' => array(
+                ApplicationFactory::ROUTING_MIDDLEWARE,
+                ApplicationFactory::DISPATCH_MIDDLEWARE,
+            ),
+            'priority' => 1,
+        ],
+        [
+            'middleware' => NotFoundHandler::class,
+            'priority' => -1,
+        ],
+    ],
     'debug' => true,
     'templates' => [
         'extension' => 'html.twig',
@@ -94,6 +107,9 @@ $container[RouterInterface::class] = function () {
     return new FastRouteRouter();
 };
 $container[Application::class] = new ApplicationFactory();
+$container[NotFoundHandler::class] = function() {
+    return new NotFoundHandler(new Response());
+};
 
 /*
  * Templating
