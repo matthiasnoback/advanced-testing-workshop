@@ -11,7 +11,6 @@ default:
             paths: [ "%paths.base%/test/EndToEnd/features"]
             contexts:
                 - Test\EndToEnd\FeatureContext
-                - Behat\MinkExtension\Context\MinkContext
         end_to_end:
             paths: [ "%paths.base%/test/Acceptance/features"]
             contexts:

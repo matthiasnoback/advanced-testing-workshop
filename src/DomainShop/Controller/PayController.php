@@ -5,6 +5,7 @@ namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
 use DomainShop\Entity\Order;
+use DomainShop\Entity\Pricing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Zend\Diactoros\Response\RedirectResponse;
@@ -37,8 +38,8 @@ final class PayController implements MiddlewareInterface
         /** @var Order $order */
         $order = Database::retrieve(Order::class, (string)$orderId);
 
-        // TODO calculate?
-        $orderAmount = 1000;
+        /** @var Pricing $pricing */
+        $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
 
         if ($request->getMethod() === 'POST') {
             $submittedData = $request->getParsedBody();
@@ -55,7 +56,7 @@ final class PayController implements MiddlewareInterface
         $response->getBody()->write($this->renderer->render('pay.html.twig', [
             'orderId' => $orderId,
             'domainName' => $order->getDomainName(),
-            'orderAmount' => $orderAmount
+            'orderAmount' => $pricing->getAmount()
         ]));
 
         return $response;

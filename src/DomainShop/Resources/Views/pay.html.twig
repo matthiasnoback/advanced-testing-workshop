@@ -3,7 +3,7 @@
 {% block content %}
     <h2>Pay for {{ domainName }}</h2>
 
-    <h3>Amount: <b>€{{ (orderAmount / 100)|number_format(2, ',', '.') }}</b></h3>
+    <h3>Amount: <b>EUR {{ (orderAmount / 100)|number_format(2) }}</b></h3>
 
     <form method="post" action="{{ url('pay', { orderId: orderId }) }}" enctype="multipart/form-data">
         <button type="submit"class="btn btn-default" name="cancel">Cancel</button>

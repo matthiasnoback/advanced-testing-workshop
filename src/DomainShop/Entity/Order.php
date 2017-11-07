@@ -79,4 +79,10 @@ final class Order
     {
         $this->wasPaid = $wasPaid;
     }
+
+    public function getDomainNameExtension(): string
+    {
+        $parts = explode('.', $this->getDomainName());
+        return '.' . $parts[1];
+    }
 }

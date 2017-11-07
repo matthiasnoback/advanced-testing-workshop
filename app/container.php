@@ -5,6 +5,7 @@ use DomainShop\Controller\FinishController;
 use DomainShop\Controller\HomepageController;
 use DomainShop\Controller\PayController;
 use DomainShop\Controller\RegisterController;
+use DomainShop\Controller\SetPriceController;
 use DomainShop\Resources\Views\TwigTemplates;
 use Interop\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
@@ -70,18 +71,12 @@ $container['config'] = [
             'middleware' => FinishController::class,
             'allowed_methods' => ['GET']
         ],
-//        [
-//            'name' => 'meetup_details',
-//            'path' => '/meetup/{id}',
-//            'middleware' => MeetupDetailsController::class,
-//            'allowed_methods' => ['GET']
-//        ],
-//        [
-//            'name' => 'schedule_meetup',
-//            'path' => '/schedule-meetup',
-//            'middleware' => ScheduleMeetupController::class,
-//            'allowed_methods' => ['GET', 'POST']
-//        ]
+        [
+            'name' => 'set_price',
+            'path' => '/set-price',
+            'middleware' => SetPriceController::class,
+            'allowed_methods' => ['POST']
+        ],
     ]
 ];
 
@@ -137,6 +132,9 @@ $container[FinishController::class] = function (ContainerInterface $container) {
         $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class)
     );
+};
+$container[SetPriceController::class] = function (ContainerInterface $container) {
+    return new SetPriceController();
 };
 
 return $container;

@@ -1,4 +1,7 @@
 Feature:
+  Background:
+    Given a ".com" domain name costs "EUR 10.00"
+
   Scenario: Buying an available domain name
     Given I am on the homepage
     When I fill in "Domain name" with "totallyrandomdomainname.com"
@@ -11,7 +14,7 @@ Feature:
       | Email address | matthiasnoback@gmail.com  |
     And I press "Buy this domain name"
     Then I should see "Pay for totallyrandomdomainname.com"
-    And I should see "Amount: €10,00"
+    And I should see "Amount: EUR 10.00"
     When I press "Pay"
     Then I should see "You are now the owner of totallyrandomdomainname.com"
 
