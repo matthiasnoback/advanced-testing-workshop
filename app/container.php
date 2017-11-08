@@ -12,6 +12,7 @@ use DomainShop\Resources\Views\TwigTemplates;
 use DomainShop\Service\ExchangeRateService;
 use DomainShop\Service\FakeExchangeRateService;
 use DomainShop\Service\LiveExchangeRateService;
+use DomainShop\Service\PayForOrder;
 use DomainShop\Service\RegisterDomainName;
 use DomainShop\SystemClock;
 use Interop\Container\ContainerInterface;
@@ -150,7 +151,8 @@ $container[PayController::class] = function (ContainerInterface $container) {
     return new PayController(
         $container->get(ExchangeRateService::class),
         $container->get(RouterInterface::class),
-        $container->get(TemplateRendererInterface::class)
+        $container->get(TemplateRendererInterface::class),
+        $container->get(PayForOrder::class)
     );
 };
 $container[FinishController::class] = function (ContainerInterface $container) {
@@ -167,6 +169,9 @@ $container[SetPriceController::class] = function () {
  */
 $container[RegisterDomainName::class] = function () {
     return new RegisterDomainName();
+};
+$container[PayForOrder::class] = function() {
+    return new PayForOrder();
 };
 
 if ($applicationEnv === 'testing') {

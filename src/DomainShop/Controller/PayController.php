@@ -7,9 +7,9 @@ use Common\Persistence\Database;
 use DomainShop\Entity\Order;
 use DomainShop\Entity\Pricing;
 use DomainShop\Service\ExchangeRateService;
+use DomainShop\Service\PayForOrder;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Swap\Builder;
 use Zend\Diactoros\Response\RedirectResponse;
 use Zend\Expressive\Router\RouterInterface;
 use Zend\Expressive\Template\TemplateRendererInterface;
@@ -26,16 +26,27 @@ final class PayController implements MiddlewareInterface
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var TemplateRendererInterface
      */
     private $renderer;
 
-    public function __construct(ExchangeRateService $exchangeRateService, RouterInterface $router, TemplateRendererInterface $renderer)
-    {
+    /**
+     * @var PayForOrder
+     */
+    private $payForOrderService;
+
+    public function __construct(
+        ExchangeRateService $exchangeRateService,
+        RouterInterface $router,
+        TemplateRendererInterface $renderer,
+        PayForOrder $payForOrderService
+    ) {
         $this->exchangeRateService = $exchangeRateService;
         $this->router = $router;
         $this->renderer = $renderer;
+        $this->payForOrderService = $payForOrderService;
     }
 
     public function __invoke(Request $request, Response $response, callable $out = null)
@@ -43,7 +54,7 @@ final class PayController implements MiddlewareInterface
         $orderId = $request->getAttribute('orderId');
 
         /** @var Order $order */
-        $order = Database::retrieve(Order::class, (string)$orderId);
+        $order = Database::retrieve(Order::class, $orderId);
 
         /** @var Pricing $pricing */
         $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
@@ -61,8 +72,7 @@ final class PayController implements MiddlewareInterface
         if ($request->getMethod() === 'POST') {
             $submittedData = $request->getParsedBody();
             if (isset($submittedData['pay'])) {
-                $order->setWasPaid(true);
-                Database::persist($order);
+                $this->payForOrderService->handle($orderId);
             }
 
             return new RedirectResponse(
