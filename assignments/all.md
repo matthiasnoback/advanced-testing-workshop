@@ -51,4 +51,30 @@ For each of these adapters we defined an interface; a contract for communication
 
 # Unit tests
 
-TODO
+Having tested the main use case of this application, we should take a look at the design of its smaller units. We didn't write unit tests while developing this code, but we are going to add them now. This should help us when we're going to improve the domain model later on. We want to prove that on their own, these domain objects encapsulate their data well (i.e. they protect their domain invariants) and have intention-revealing interfaces.
+
+Find ways to restructure the code, and migrate the model from an anemic one, with only getters and setters and almost no encapsulation, to a rich one, with a predefined set of behavior. For example: an `Order` can only be created in one way. It can only be modified in one way. Try to make these different usages clear in the code and test each of them.
+
+Find ways to encapsulate domain concepts like "email address", "currency", "amount", "domain name", etc. Make sure that every domain object can only exist in a complete, consistent, and valid state.
+
+While you're at it, you can clean up the code in the `PayController` and extract a class which simply calculates the price, using the exchange service, and the pricing repository.
+
+# Working effectively with tests
+
+In order to not be held back by the test suite, you need to be able to:
+
+- Run and rerun single tests, groups of tests, types of tests.
+- Easily find out why a test fails.
+
+In order to do this, you could use some or all of the following:
+
+- PHPUnit groups & filters
+- Behat tags
+- Step debugging (using XDebug)
+- Maximal verbosity of command line output
+- Special error renderers that don't spit out a lot of HTML (when running your system tests)
+- Exception and error logging (built-in; check out `docker-compose logs -f web`)
+- A way to open the last failed response in a browser (see also MinkContext's `@Then show last response` step definition)
+- Last *and* least: dumping variables using Symfony's `dump()` function.
+
+Give these things a try, and make sure you're not slowed down too much while working on your test suite! 
