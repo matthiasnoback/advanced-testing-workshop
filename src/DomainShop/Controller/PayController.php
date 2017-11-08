@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
+use DomainShop\Clock;
 use DomainShop\Entity\Order;
 use DomainShop\Entity\Pricing;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -17,6 +18,11 @@ use Zend\Stratigility\MiddlewareInterface;
 final class PayController implements MiddlewareInterface
 {
     /**
+     * @var Clock
+     */
+    private $clock;
+
+    /**
      * @var RouterInterface
      */
     private $router;
@@ -26,8 +32,9 @@ final class PayController implements MiddlewareInterface
      */
     private $renderer;
 
-    public function __construct(RouterInterface $router, TemplateRendererInterface $renderer)
+    public function __construct(Clock $clock, RouterInterface $router, TemplateRendererInterface $renderer)
     {
+        $this->clock = $clock;
         $this->router = $router;
         $this->renderer = $renderer;
     }
@@ -46,7 +53,7 @@ final class PayController implements MiddlewareInterface
             $swap = (new Builder())
                 ->add('fixer')
                 ->build();
-            $rate = $swap->latest($pricing->getCurrency() . '/' . $order->getPayInCurrency());
+            $rate = $swap->historical($pricing->getCurrency() . '/' . $order->getPayInCurrency(), $this->clock->now());
 
             $currency = $order->getPayInCurrency();
             $amount = $pricing->getAmount() * $rate->getValue();

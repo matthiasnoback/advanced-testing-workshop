@@ -1,5 +1,6 @@
 <?php
 
+use DomainShop\Clock;
 use DomainShop\Controller\CheckAvailabilityController;
 use DomainShop\Controller\FinishController;
 use DomainShop\Controller\HomepageController;
@@ -26,6 +27,12 @@ Debug::enable();
 $container = new Container();
 
 $applicationEnv = getenv('ENV') ?: 'development';
+
+$serverTime = getenv('SERVER_TIME');
+if ($serverTime) {
+    Clock::setNow(new \DateTimeImmutable($serverTime));
+}
+
 $container['config'] = [
     'middleware_pipeline' => [
         'routing' => [
@@ -139,6 +146,7 @@ $container[RegisterController::class] = function (ContainerInterface $container)
 };
 $container[PayController::class] = function (ContainerInterface $container) {
     return new PayController(
+        $container->get(Clock::class),
         $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class)
     );
@@ -150,6 +158,10 @@ $container[FinishController::class] = function (ContainerInterface $container) {
 };
 $container[SetPriceController::class] = function () {
     return new SetPriceController();
+};
+
+$container[Clock::class] = function() {
+    return new Clock();
 };
 
 return $container;
