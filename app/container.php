@@ -7,7 +7,9 @@ use DomainShop\Controller\HomepageController;
 use DomainShop\Controller\PayController;
 use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
+use DomainShop\LockedClock;
 use DomainShop\Resources\Views\TwigTemplates;
+use DomainShop\SystemClock;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Debug\Debug;
 use Xtreamwayz\Pimple\Container;
@@ -27,11 +29,6 @@ Debug::enable();
 $container = new Container();
 
 $applicationEnv = getenv('ENV') ?: 'development';
-
-$serverTime = getenv('SERVER_TIME');
-if ($serverTime) {
-    Clock::setNow(new \DateTimeImmutable($serverTime));
-}
 
 $container['config'] = [
     'middleware_pipeline' => [
@@ -160,8 +157,19 @@ $container[SetPriceController::class] = function () {
     return new SetPriceController();
 };
 
-$container[Clock::class] = function() {
-    return new Clock();
-};
+if ($applicationEnv === 'testing') {
+    $container[Clock::class] = function() {
+        $serverTime = getenv('SERVER_TIME');
+        if (!$serverTime) {
+            throw new \RuntimeException('Undefined environment variable "SERVER_TIME"');
+        }
+
+        return new LockedClock(new \DateTimeImmutable($serverTime));
+    };
+} else {
+    $container[Clock::class] = function() {
+        return new SystemClock();
+    };
+}
 
 return $container;
