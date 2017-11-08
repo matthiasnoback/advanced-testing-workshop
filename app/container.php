@@ -9,12 +9,14 @@ use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
 use DomainShop\LockedClock;
 use DomainShop\Resources\Views\TwigTemplates;
+use DomainShop\Service\DomainAvailabilityService;
 use DomainShop\Service\ExchangeRateService;
 use DomainShop\Service\FakeExchangeRateService;
 use DomainShop\Service\LiveExchangeRateService;
 use DomainShop\Service\PayForOrder;
 use DomainShop\Service\PricingService;
 use DomainShop\Service\RegisterDomainName;
+use DomainShop\Service\WhoisDomainAvailabilityService;
 use DomainShop\SystemClock;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Debug\Debug;
@@ -139,7 +141,10 @@ $container[HomepageController::class] = function (ContainerInterface $container)
     return new HomepageController($container->get(TemplateRendererInterface::class));
 };
 $container[CheckAvailabilityController::class] = function (ContainerInterface $container) {
-    return new CheckAvailabilityController($container->get(TemplateRendererInterface::class));
+    return new CheckAvailabilityController(
+        $container->get(TemplateRendererInterface::class),
+        $container->get(DomainAvailabilityService::class)
+    );
 };
 $container[RegisterController::class] = function (ContainerInterface $container) {
     return new RegisterController(
@@ -176,6 +181,9 @@ $container[PayForOrder::class] = function() {
 };
 $container[PricingService::class] = function(ContainerInterface $container) {
     return new PricingService($container->get(ExchangeRateService::class));
+};
+$container[DomainAvailabilityService::class] = function() {
+    return new WhoisDomainAvailabilityService();
 };
 
 if ($applicationEnv === 'testing') {

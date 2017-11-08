@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace DomainShop\Controller;
 
+use DomainShop\Service\DomainAvailability;
+use DomainShop\Service\DomainAvailabilityService;
 use Novutec\WhoisParser\Parser;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -16,9 +18,15 @@ final class CheckAvailabilityController implements MiddlewareInterface
      */
     private $renderer;
 
-    public function __construct(TemplateRendererInterface $renderer)
+    /**
+     * @var DomainAvailabilityService
+     */
+    private $domainAvailabilityService;
+
+    public function __construct(TemplateRendererInterface $renderer, DomainAvailabilityService $domainAvailabilityService)
     {
         $this->renderer = $renderer;
+        $this->domainAvailabilityService = $domainAvailabilityService;
     }
 
     public function __invoke(Request $request, Response $response, callable $out = null)
@@ -28,25 +36,15 @@ final class CheckAvailabilityController implements MiddlewareInterface
         if (!isset($submittedData['domain_name'])) {
             throw new \RuntimeException('No domain name provided');
         }
-        if (!preg_match('/^\w+\.\w+$/', $submittedData['domain_name'])) {
-            throw new \RuntimeException('Invalid domain name provided');
-        }
 
         $domainName = $submittedData['domain_name'];
 
-        $parser = new Parser();
-        $parser->throwExceptions(true);
-        $result = $parser->lookup($domainName);
-        if ($result->name !== $domainName) {
-            throw new \RuntimeException('Invalid domain name');
-        }
-
-        $isAvailable = !$result->registered;
+        $domainAvailability = $this->domainAvailabilityService->lookup($domainName);
 
         $response->getBody()->write($this->renderer->render('availability.html.twig', [
-            'isAvailable' => $isAvailable,
+            'isAvailable' => $domainAvailability->isAvailable(),
             'domainName' => $domainName,
-            'whoisResult' => $result
+            'whoisInformation' => $domainAvailability->whoisInformation()
         ]));
 
         return $response;
