@@ -5,9 +5,8 @@ namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
 use DomainShop\Entity\Order;
-use DomainShop\Entity\Pricing;
-use DomainShop\Service\ExchangeRateService;
 use DomainShop\Service\PayForOrder;
+use DomainShop\Service\PricingService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Zend\Diactoros\Response\RedirectResponse;
@@ -17,11 +16,6 @@ use Zend\Stratigility\MiddlewareInterface;
 
 final class PayController implements MiddlewareInterface
 {
-    /**
-     * @var ExchangeRateService
-     */
-    private $exchangeRateService;
-
     /**
      * @var RouterInterface
      */
@@ -33,19 +27,24 @@ final class PayController implements MiddlewareInterface
     private $renderer;
 
     /**
+     * @var PricingService
+     */
+    private $pricingService;
+
+    /**
      * @var PayForOrder
      */
     private $payForOrderService;
 
     public function __construct(
-        ExchangeRateService $exchangeRateService,
         RouterInterface $router,
         TemplateRendererInterface $renderer,
+        PricingService $pricingService,
         PayForOrder $payForOrderService
     ) {
-        $this->exchangeRateService = $exchangeRateService;
         $this->router = $router;
         $this->renderer = $renderer;
+        $this->pricingService = $pricingService;
         $this->payForOrderService = $payForOrderService;
     }
 
@@ -56,18 +55,7 @@ final class PayController implements MiddlewareInterface
         /** @var Order $order */
         $order = Database::retrieve(Order::class, $orderId);
 
-        /** @var Pricing $pricing */
-        $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
-
-        if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
-            $exchangeRate = $this->exchangeRateService->getExchangeRate($pricing->getCurrency(), $order->getPayInCurrency());
-
-            $currency = $order->getPayInCurrency();
-            $amount = $pricing->getAmount() * $exchangeRate;
-        } else {
-            $currency = $pricing->getCurrency();
-            $amount = $pricing->getAmount();
-        }
+        $price = $this->pricingService->getPriceForDomainNameExtension($order->getDomainNameExtension(), $order->getPayInCurrency());
 
         if ($request->getMethod() === 'POST') {
             $submittedData = $request->getParsedBody();
@@ -83,8 +71,8 @@ final class PayController implements MiddlewareInterface
         $response->getBody()->write($this->renderer->render('pay.html.twig', [
             'orderId' => $orderId,
             'domainName' => $order->getDomainName(),
-            'currency' => $currency,
-            'amount' => $amount
+            'currency' => $price->currency(),
+            'amount' => $price->amount()
         ]));
 
         return $response;
