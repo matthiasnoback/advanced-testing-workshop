@@ -12,6 +12,7 @@ use DomainShop\Resources\Views\TwigTemplates;
 use DomainShop\Service\ExchangeRateService;
 use DomainShop\Service\FakeExchangeRateService;
 use DomainShop\Service\LiveExchangeRateService;
+use DomainShop\Service\RegisterDomainName;
 use DomainShop\SystemClock;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Debug\Debug;
@@ -141,7 +142,8 @@ $container[CheckAvailabilityController::class] = function (ContainerInterface $c
 $container[RegisterController::class] = function (ContainerInterface $container) {
     return new RegisterController(
         $container->get(RouterInterface::class),
-        $container->get(TemplateRendererInterface::class)
+        $container->get(TemplateRendererInterface::class),
+        $container->get(RegisterDomainName::class)
     );
 };
 $container[PayController::class] = function (ContainerInterface $container) {
@@ -158,6 +160,13 @@ $container[FinishController::class] = function (ContainerInterface $container) {
 };
 $container[SetPriceController::class] = function () {
     return new SetPriceController();
+};
+
+/*
+ * Application services
+ */
+$container[RegisterDomainName::class] = function () {
+    return new RegisterDomainName();
 };
 
 if ($applicationEnv === 'testing') {

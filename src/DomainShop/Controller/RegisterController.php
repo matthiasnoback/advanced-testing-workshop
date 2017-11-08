@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace DomainShop\Controller;
 
-use Common\Persistence\Database;
-use DomainShop\Entity\Order;
+use DomainShop\Service\RegisterDomainName;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Zend\Diactoros\Response\RedirectResponse;
@@ -24,10 +23,16 @@ final class RegisterController implements MiddlewareInterface
      */
     private $renderer;
 
-    public function __construct(RouterInterface $router, TemplateRendererInterface $renderer)
+    /**
+     * @var RegisterDomainName
+     */
+    private $service;
+
+    public function __construct(RouterInterface $router, TemplateRendererInterface $renderer, RegisterDomainName $service)
     {
         $this->router = $router;
         $this->renderer = $renderer;
+        $this->service = $service;
     }
 
     public function __invoke(Request $request, Response $response, callable $out = null)
@@ -51,16 +56,12 @@ final class RegisterController implements MiddlewareInterface
             }
 
             if (empty($formErrors)) {
-                $orderId = count(Database::retrieveAll(Order::class)) + 1;
-
-                $order = new Order();
-                $order->setId($orderId);
-                $order->setDomainName($submittedData['domain_name']);
-                $order->setOwnerName($submittedData['name']);
-                $order->setOwnerEmailAddress($submittedData['email_address']);
-                $order->setPayInCurrency($submittedData['currency']);
-
-                Database::persist($order);
+                $order = $this->service->handle(
+                    $submittedData['domain_name'],
+                    $submittedData['name'],
+                    $submittedData['email_address'],
+                    $submittedData['currency']
+                );
 
                 return new RedirectResponse(
                     $this->router->generateUri(
