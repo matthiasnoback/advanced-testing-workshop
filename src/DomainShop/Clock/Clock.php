@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DomainShop;
+namespace DomainShop\Clock;
 
 interface Clock
 {

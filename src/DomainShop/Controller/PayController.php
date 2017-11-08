@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace DomainShop\Controller;
 
-use Common\Persistence\Database;
-use DomainShop\Entity\Order;
+use DomainShop\Entity\OrderRepository;
 use DomainShop\Service\PayForOrder;
-use DomainShop\Service\PricingService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Zend\Diactoros\Response\RedirectResponse;
@@ -27,9 +25,9 @@ final class PayController implements MiddlewareInterface
     private $renderer;
 
     /**
-     * @var PricingService
+     * @var OrderRepository
      */
-    private $pricingService;
+    private $orderRepository;
 
     /**
      * @var PayForOrder
@@ -39,12 +37,12 @@ final class PayController implements MiddlewareInterface
     public function __construct(
         RouterInterface $router,
         TemplateRendererInterface $renderer,
-        PricingService $pricingService,
+        OrderRepository $orderRepository,
         PayForOrder $payForOrderService
     ) {
         $this->router = $router;
         $this->renderer = $renderer;
-        $this->pricingService = $pricingService;
+        $this->orderRepository = $orderRepository;
         $this->payForOrderService = $payForOrderService;
     }
 
@@ -52,15 +50,12 @@ final class PayController implements MiddlewareInterface
     {
         $orderId = $request->getAttribute('orderId');
 
-        /** @var Order $order */
-        $order = Database::retrieve(Order::class, $orderId);
-
-        $price = $this->pricingService->getPriceForDomainNameExtension($order->getDomainNameExtension(), $order->getPayInCurrency());
+        $order = $this->orderRepository->getById($orderId);
 
         if ($request->getMethod() === 'POST') {
             $submittedData = $request->getParsedBody();
             if (isset($submittedData['pay'])) {
-                $this->payForOrderService->handle($orderId);
+                $this->payForOrderService->handle($orderId, $submittedData['currency'], (int)$submittedData['amount']);
             }
 
             return new RedirectResponse(
@@ -71,8 +66,8 @@ final class PayController implements MiddlewareInterface
         $response->getBody()->write($this->renderer->render('pay.html.twig', [
             'orderId' => $orderId,
             'domainName' => $order->getDomainName(),
-            'currency' => $price->currency(),
-            'amount' => $price->amount()
+            'currency' => $order->getPrice()->currency(),
+            'amount' => $order->getPrice()->amount()
         ]));
 
         return $response;

@@ -1,23 +1,28 @@
 <?php
 
-use DomainShop\Clock;
+use DomainShop\Clock\Clock;
 use DomainShop\Controller\CheckAvailabilityController;
 use DomainShop\Controller\FinishController;
 use DomainShop\Controller\HomepageController;
 use DomainShop\Controller\PayController;
 use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
-use DomainShop\LockedClock;
+use DomainShop\Entity\OrderRepository;
+use DomainShop\Entity\PricingRepository;
+use DomainShop\Clock\LockedClock;
+use DomainShop\Persistence\FileBasedOrderRepository;
+use DomainShop\Persistence\FileBasedPricingRepository;
 use DomainShop\Resources\Views\TwigTemplates;
-use DomainShop\Service\DomainAvailabilityService;
-use DomainShop\Service\ExchangeRateService;
-use DomainShop\Service\FakeExchangeRateService;
-use DomainShop\Service\LiveExchangeRateService;
+use DomainShop\Service\DomainAvailability\DomainAvailabilityService;
+use DomainShop\Service\DomainAvailability\FakeDomainAvailabilityService;
+use DomainShop\Service\ExchangeRate\ExchangeRateService;
+use DomainShop\Service\ExchangeRate\FakeExchangeRateService;
+use DomainShop\Service\ExchangeRate\LiveExchangeRateService;
 use DomainShop\Service\PayForOrder;
 use DomainShop\Service\PricingService;
 use DomainShop\Service\RegisterDomainName;
-use DomainShop\Service\WhoisDomainAvailabilityService;
-use DomainShop\SystemClock;
+use DomainShop\Service\DomainAvailability\WhoisDomainAvailabilityService;
+use DomainShop\Clock\SystemClock;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Debug\Debug;
 use Xtreamwayz\Pimple\Container;
@@ -157,33 +162,54 @@ $container[PayController::class] = function (ContainerInterface $container) {
     return new PayController(
         $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class),
-        $container->get(PricingService::class),
+        $container->get(OrderRepository::class),
         $container->get(PayForOrder::class)
     );
 };
 $container[FinishController::class] = function (ContainerInterface $container) {
     return new FinishController(
-        $container->get(TemplateRendererInterface::class)
+        $container->get(TemplateRendererInterface::class),
+        $container->get(OrderRepository::class)
     );
 };
-$container[SetPriceController::class] = function () {
-    return new SetPriceController();
+$container[SetPriceController::class] = function (ContainerInterface $container) {
+    return new SetPriceController(
+        $container->get(PricingRepository::class)
+    );
 };
 
 /*
  * Application services
  */
-$container[RegisterDomainName::class] = function () {
-    return new RegisterDomainName();
+$container[RegisterDomainName::class] = function (ContainerInterface $container) {
+    return new RegisterDomainName(
+        $container->get(PricingService::class),
+        $container->get(OrderRepository::class)
+    );
 };
-$container[PayForOrder::class] = function() {
-    return new PayForOrder();
+$container[PayForOrder::class] = function (ContainerInterface $container) {
+    return new PayForOrder(
+        $container->get(OrderRepository::class)
+    );
 };
-$container[PricingService::class] = function(ContainerInterface $container) {
-    return new PricingService($container->get(ExchangeRateService::class));
+$container[PricingService::class] = function (ContainerInterface $container) {
+    return new PricingService(
+        $container->get(PricingRepository::class),
+        $container->get(ExchangeRateService::class)
+    );
 };
-$container[DomainAvailabilityService::class] = function() {
+$container[DomainAvailabilityService::class] = function () {
     return new WhoisDomainAvailabilityService();
+};
+
+/*
+ * Repositories
+ */
+$container[OrderRepository::class] = function () {
+    return new FileBasedOrderRepository();
+};
+$container[PricingRepository::class] = function () {
+    return new FileBasedPricingRepository();
 };
 
 if ($applicationEnv === 'testing') {
@@ -208,6 +234,16 @@ if ($applicationEnv === 'testing') {
 } else {
     $container[ExchangeRateService::class] = function (ContainerInterface $container) {
         return new LiveExchangeRateService($container->get(Clock::class));
+    };
+}
+
+if ($applicationEnv === 'testing') {
+    $container[DomainAvailabilityService::class] = function () {
+        return new FakeDomainAvailabilityService();
+    };
+} else {
+    $container[DomainAvailabilityService::class] = function () {
+        return new WhoisDomainAvailabilityService();
     };
 }
 

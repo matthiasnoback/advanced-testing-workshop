@@ -3,10 +3,38 @@
 namespace Test\Acceptance;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Tester\Exception\PendingException;
+use DomainShop\Entity\Pricing;
+use DomainShop\Persistence\FileBasedOrderRepository;
+use DomainShop\Persistence\FileBasedPricingRepository;
+use DomainShop\Persistence\InMemoryOrderRepository;
+use DomainShop\Persistence\InMemoryPricingRepository;
+use DomainShop\Service\ExchangeRate\FakeExchangeRateService;
+use DomainShop\Service\PayForOrder;
+use DomainShop\Service\PricingService;
+use DomainShop\Service\RegisterDomainName;
 
 final class FeatureContext implements Context
 {
+    /**
+     * @var FakeExchangeRateService
+     */
+    private $exchangeRateService;
+
+    /**
+     * @var null|string
+     */
+    private $orderId;
+
+    /**
+     * @var FileBasedPricingRepository
+     */
+    private $pricingRepository;
+
+    /**
+     * @var FileBasedOrderRepository
+     */
+    private $orderRepository;
+
     /**
      * Initializes context.
      *
@@ -16,53 +44,71 @@ final class FeatureContext implements Context
      */
     public function __construct()
     {
+        $this->exchangeRateService = new FakeExchangeRateService();
+        $this->pricingRepository = new InMemoryPricingRepository();
+        $this->orderRepository = new InMemoryOrderRepository();
+    }
+
+    private static function floatStringToIntAmount(string $amount): int
+    {
+        $floatAmount = (float)$amount;
+
+        return (int)($floatAmount * 100);
     }
 
     /**
-     * @Given I want to check the availability of :arg1
+     * @Given /^a (\.[a-z]+) domain name costs ([A-Z]+) (\d+\.\d+)$/
      */
-    public function iWantToCheckTheAvailabilityOf($arg1)
+    public function aDomainNameCosts(string $domainNameExtension, string $currency, string $amount)
     {
-        throw new PendingException();
+        $pricing = new Pricing();
+        $pricing->setExtension($domainNameExtension);
+        $pricing->setCurrency($currency);
+        $pricing->setAmount(self::floatStringToIntAmount($amount));
+
+        $this->pricingRepository->save($pricing);
     }
 
     /**
-     * @Given it turns out to be available
+     * @Given /^the exchange rate ([A-Z]+) to ([A-Z]+) is (\d+\.\d+)$/
      */
-    public function itTurnsOutToBeAvailable()
+    public function theExchangeRateIs(string $fromCurrency, string $toCurrency, string $rate)
     {
-        throw new PendingException();
+        $this->exchangeRateService->setExchangeRate($fromCurrency, $toCurrency, (float)$rate);
     }
 
     /**
-     * @When I register it
+     * @Given /^I register "([^"]*)" to "([^"]*)" with email address "([^"]*)" and I want to pay in ([A-Z]+)$/
      */
-    public function iRegisterIt()
+    public function iRegisterADomainName(string $domainName, string $name, string $emailAddress, string $payInCurrency)
     {
-        throw new PendingException();
+        $service = new RegisterDomainName(
+            new PricingService($this->pricingRepository, $this->exchangeRateService),
+            $this->orderRepository
+        );
+
+        $order = $service->handle($domainName, $name, $emailAddress, $payInCurrency);
+
+        $this->orderId = $order->id();
     }
 
     /**
-     * @When I fill in my name (:arg1) and email address (:arg2)
+     * @Given /^I pay (\d+\.\d+) ([A-Z]+) for it$/
      */
-    public function iFillInMyNameAndEmailAddress($arg1, $arg2)
+    public function iPayForIt(string $amount, string $currency)
     {
-        throw new PendingException();
+        $service = new PayForOrder($this->orderRepository);
+
+        $service->handle($this->orderId, $currency, self::floatStringToIntAmount($amount));
     }
 
     /**
-     * @When I pay EUR :arg1 for it
+     * @Then /^the order was paid$/
      */
-    public function iPayEurForIt($arg1)
+    public function theOrderWasPaid()
     {
-        throw new PendingException();
-    }
+        $order = $this->orderRepository->getById($this->orderId);
 
-    /**
-     * @Then the domain name is mine
-     */
-    public function theDomainNameIsMine()
-    {
-        throw new PendingException();
+        assertTrue($order->wasPaid());
     }
 }

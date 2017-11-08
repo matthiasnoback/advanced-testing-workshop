@@ -3,18 +3,26 @@ declare(strict_types=1);
 
 namespace DomainShop\Service;
 
-use Common\Persistence\Database;
-use DomainShop\Entity\Order;
+use DomainShop\Entity\OrderRepository;
 
 final class PayForOrder
 {
-    public function handle(string $orderId)
+    /**
+     * @var OrderRepository
+     */
+    private $orderRepository;
+
+    public function __construct(OrderRepository $orderRepository)
     {
-        /** @var Order $order */
-        $order = Database::retrieve(Order::class, (string)$orderId);
+        $this->orderRepository = $orderRepository;
+    }
 
-        $order->setWasPaid(true);
+    public function handle(string $orderId, string $currency, int $amount): void
+    {
+        $order = $this->orderRepository->getById($orderId);
 
-        Database::persist($order);
+        $order->pay($currency, $amount);
+
+        $this->orderRepository->save($order);
     }
 }

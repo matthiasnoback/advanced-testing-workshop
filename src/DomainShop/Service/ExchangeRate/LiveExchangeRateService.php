@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace DomainShop\Service;
+namespace DomainShop\Service\ExchangeRate;
 
-use DomainShop\Clock;
+use DomainShop\Clock\Clock;
 use Swap\Builder;
 
 final class LiveExchangeRateService implements ExchangeRateService

@@ -26,6 +26,11 @@ final class Order
     private $ownerEmailAddress;
 
     /**
+     * @var Price
+     */
+    private $price;
+
+    /**
      * @var string
      */
     private $payInCurrency;
@@ -80,11 +85,6 @@ final class Order
         return $this->wasPaid;
     }
 
-    public function setWasPaid(bool $wasPaid): void
-    {
-        $this->wasPaid = $wasPaid;
-    }
-
     public function getDomainNameExtension(): string
     {
         $parts = explode('.', $this->getDomainName());
@@ -99,5 +99,34 @@ final class Order
     public function getPayInCurrency(): string
     {
         return $this->payInCurrency;
+    }
+
+    public function setPrice(Price $price): void
+    {
+        $this->price = $price;
+    }
+
+    public function getPrice(): Price
+    {
+        return $this->price;
+    }
+
+    public function pay(string $currency, int $amount): void
+    {
+        if ($this->getPrice()->currency() !== $currency) {
+            throw new \LogicException(sprintf(
+                'Order should be paid in the currency "%s"',
+                $this->getPrice()->currency()
+            ));
+        }
+
+        if ($this->getPrice()->amount() !== $amount) {
+            throw new \LogicException(sprintf(
+                'Paid amount should be "%d"',
+                $this->getPrice()->amount()
+            ));
+        }
+
+        $this->wasPaid = true;
     }
 }

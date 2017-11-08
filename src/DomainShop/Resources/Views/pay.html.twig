@@ -6,6 +6,8 @@
     <h3>Amount: <b>{{ currency }} {{ (amount / 100)|number_format(2) }}</b></h3>
 
     <form method="post" action="{{ url('pay', { orderId: orderId }) }}" enctype="multipart/form-data">
+        <input type="hidden" name="currency" value="{{ currency }}"/>
+        <input type="hidden" name="amount" value="{{ amount }}"/>
         <button type="submit"class="btn btn-default" name="cancel">Cancel</button>
         <button type="submit"class="btn btn-primary" name="pay">Pay</button>
     </form>

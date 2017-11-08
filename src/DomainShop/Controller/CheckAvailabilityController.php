@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 namespace DomainShop\Controller;
 
-use DomainShop\Service\DomainAvailability;
-use DomainShop\Service\DomainAvailabilityService;
-use Novutec\WhoisParser\Parser;
+use DomainShop\Service\DomainAvailability\DomainAvailabilityService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Zend\Expressive\Template\TemplateRendererInterface;

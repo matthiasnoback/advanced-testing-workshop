@@ -3,26 +3,31 @@ declare(strict_types=1);
 
 namespace DomainShop\Service;
 
-use Common\Persistence\Database;
 use DomainShop\Entity\Price;
-use DomainShop\Entity\Pricing;
+use DomainShop\Entity\PricingRepository;
+use DomainShop\Service\ExchangeRate\ExchangeRateService;
 
 final class PricingService
 {
+    /**
+     * @var PricingRepository
+     */
+    private $pricingRepository;
+
     /**
      * @var ExchangeRateService
      */
     private $exchangeRateService;
 
-    public function __construct(ExchangeRateService $exchangeRateService)
+    public function __construct(PricingRepository $pricingRepository, ExchangeRateService $exchangeRateService)
     {
+        $this->pricingRepository = $pricingRepository;
         $this->exchangeRateService = $exchangeRateService;
     }
 
     public function getPriceForDomainNameExtension(string $domainNameExtension, string $payInCurrency): Price
     {
-        /** @var Pricing $pricing */
-        $pricing = Database::retrieve(Pricing::class, $domainNameExtension);
+        $pricing = $this->pricingRepository->getById($domainNameExtension);
 
         if ($payInCurrency === $pricing->getCurrency()) {
             return new Price($pricing->getCurrency(), $pricing->getAmount());

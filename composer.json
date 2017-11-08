@@ -43,6 +43,9 @@
             "Test\\Acceptance\\": "test/Acceptance",
             "Test\\System\\": "test/System",
             "": "test/Unit"
-        }
+        },
+        "files": [
+            "vendor/phpunit/phpunit/src/Framework/Assert/Functions.php"
+        ]
     }
 }

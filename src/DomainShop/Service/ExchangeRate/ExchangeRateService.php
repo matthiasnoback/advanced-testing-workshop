@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace DomainShop\Service;
+namespace DomainShop\Service\ExchangeRate;
 
 interface ExchangeRateService
 {
