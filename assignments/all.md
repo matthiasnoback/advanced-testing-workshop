@@ -40,7 +40,14 @@ Meanwhile, take note of how much faster the acceptance tests are becoming.
 
 # Integration tests
 
-TODO
+We now have:
+
+1. System tests with the "dangerous" dependencies switched out. 
+2. Acceptance tests with specifications written in plain English, and with all the port adapters replaced by something faster and simpler ("fakes"). 
+
+For each of these adapters we defined an interface; a contract for communication. Now we need to verify that our assumptions about the implementation are indeed correct. So we should write *integration tests* for all the implementations we created (e.g. the exchange rate service, the whois service, and finally the repositories). We prove that all this code functions correctly. While testing this code, we don't use any test doubles; we test *the real thing*. We make a real call over the network to the Fixer exchange rate service, we make a real network call to the `whois` service, and we store real files.
+
+> Note that any errors in our assumptions, any mistake we made in interpreting the external service's API documentation, any failure on their side (a failed release, a backwards compatibility break, etc.), will show up while running the integration tests. This is a huge improvement on the current situation, because without integration tests, the problem would jump in our face when running the system tests; and in that case, who could tell us immediately what's wrong?  
 
 # Unit tests
 
