@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
-use DomainShop\Clock;
 use DomainShop\Entity\Order;
 use DomainShop\Entity\Pricing;
+use DomainShop\Service\ExchangeRateService;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Swap\Builder;
@@ -18,23 +18,22 @@ use Zend\Stratigility\MiddlewareInterface;
 final class PayController implements MiddlewareInterface
 {
     /**
-     * @var Clock
+     * @var ExchangeRateService
      */
-    private $clock;
+    private $exchangeRateService;
 
     /**
      * @var RouterInterface
      */
     private $router;
-
     /**
      * @var TemplateRendererInterface
      */
     private $renderer;
 
-    public function __construct(Clock $clock, RouterInterface $router, TemplateRendererInterface $renderer)
+    public function __construct(ExchangeRateService $exchangeRateService, RouterInterface $router, TemplateRendererInterface $renderer)
     {
-        $this->clock = $clock;
+        $this->exchangeRateService = $exchangeRateService;
         $this->router = $router;
         $this->renderer = $renderer;
     }
@@ -50,13 +49,10 @@ final class PayController implements MiddlewareInterface
         $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
 
         if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
-            $swap = (new Builder())
-                ->add('fixer')
-                ->build();
-            $rate = $swap->historical($pricing->getCurrency() . '/' . $order->getPayInCurrency(), $this->clock->now());
+            $exchangeRate = $this->exchangeRateService->getExchangeRate($pricing->getCurrency(), $order->getPayInCurrency());
 
             $currency = $order->getPayInCurrency();
-            $amount = $pricing->getAmount() * $rate->getValue();
+            $amount = $pricing->getAmount() * $exchangeRate;
         } else {
             $currency = $pricing->getCurrency();
             $amount = $pricing->getAmount();

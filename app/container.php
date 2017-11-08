@@ -9,6 +9,9 @@ use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
 use DomainShop\LockedClock;
 use DomainShop\Resources\Views\TwigTemplates;
+use DomainShop\Service\ExchangeRateService;
+use DomainShop\Service\FakeExchangeRateService;
+use DomainShop\Service\LiveExchangeRateService;
 use DomainShop\SystemClock;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Debug\Debug;
@@ -48,7 +51,7 @@ $container['config'] = [
     'final_handler' => [
         'options' => [
             'env' => $applicationEnv,
-            'onerror' => function(\Throwable $throwable) {
+            'onerror' => function (\Throwable $throwable) {
                 error_log((string)$throwable);
             }
         ]
@@ -111,7 +114,7 @@ $container[RouterInterface::class] = function () {
     return new FastRouteRouter();
 };
 $container[Application::class] = new ApplicationFactory();
-$container[NotFoundHandler::class] = function() {
+$container[NotFoundHandler::class] = function () {
     return new NotFoundHandler(new Response());
 };
 
@@ -143,7 +146,7 @@ $container[RegisterController::class] = function (ContainerInterface $container)
 };
 $container[PayController::class] = function (ContainerInterface $container) {
     return new PayController(
-        $container->get(Clock::class),
+        $container->get(ExchangeRateService::class),
         $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class)
     );
@@ -158,7 +161,7 @@ $container[SetPriceController::class] = function () {
 };
 
 if ($applicationEnv === 'testing') {
-    $container[Clock::class] = function() {
+    $container[Clock::class] = function () {
         $serverTime = getenv('SERVER_TIME');
         if (!$serverTime) {
             throw new \RuntimeException('Undefined environment variable "SERVER_TIME"');
@@ -167,8 +170,18 @@ if ($applicationEnv === 'testing') {
         return new LockedClock(new \DateTimeImmutable($serverTime));
     };
 } else {
-    $container[Clock::class] = function() {
+    $container[Clock::class] = function () {
         return new SystemClock();
+    };
+}
+
+if ($applicationEnv === 'testing') {
+    $container[ExchangeRateService::class] = function () {
+        return new FakeExchangeRateService();
+    };
+} else {
+    $container[ExchangeRateService::class] = function (ContainerInterface $container) {
+        return new LiveExchangeRateService($container->get(Clock::class));
     };
 }
 
