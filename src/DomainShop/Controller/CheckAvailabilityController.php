@@ -42,11 +42,12 @@ final class CheckAvailabilityController implements MiddlewareInterface
         }
 
         $isAvailable = !$result->registered;
+        $whoisInformation = implode("\n", $result->rawdata);
 
         $response->getBody()->write($this->renderer->render('availability.html.twig', [
             'isAvailable' => $isAvailable,
             'domainName' => $domainName,
-            'whoisResult' => $result
+            'whoisInformation' => $whoisInformation
         ]));
 
         return $response;
