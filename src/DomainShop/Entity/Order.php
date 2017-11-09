@@ -35,6 +35,11 @@ final class Order
      */
     private $wasPaid = false;
 
+    /**
+     * @var int
+     */
+    private $amount;
+
     public function id(): int
     {
         return $this->id;
@@ -99,5 +104,15 @@ final class Order
     public function getPayInCurrency(): string
     {
         return $this->payInCurrency;
+    }
+
+    public function setAmount(int $amount): void
+    {
+        $this->amount = $amount;
+    }
+
+    public function getAmount(): int
+    {
+        return $this->amount;
     }
 }

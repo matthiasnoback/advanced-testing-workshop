@@ -5,10 +5,8 @@ namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
 use DomainShop\Entity\Order;
-use DomainShop\Entity\Pricing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Swap\Builder;
 use Zend\Diactoros\Response\RedirectResponse;
 use Zend\Expressive\Router\RouterInterface;
 use Zend\Expressive\Template\TemplateRendererInterface;
@@ -39,22 +37,6 @@ final class PayController implements MiddlewareInterface
         /** @var Order $order */
         $order = Database::retrieve(Order::class, (string)$orderId);
 
-        /** @var Pricing $pricing */
-        $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
-
-        if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
-            $swap = (new Builder())
-                ->add('fixer')
-                ->build();
-            $rate = $swap->latest($pricing->getCurrency() . '/' . $order->getPayInCurrency());
-
-            $currency = $order->getPayInCurrency();
-            $amount = $pricing->getAmount() * $rate->getValue();
-        } else {
-            $currency = $pricing->getCurrency();
-            $amount = $pricing->getAmount();
-        }
-
         if ($request->getMethod() === 'POST') {
             $submittedData = $request->getParsedBody();
             if (isset($submittedData['pay'])) {
@@ -70,8 +52,8 @@ final class PayController implements MiddlewareInterface
         $response->getBody()->write($this->renderer->render('pay.html.twig', [
             'orderId' => $orderId,
             'domainName' => $order->getDomainName(),
-            'currency' => $currency,
-            'amount' => $amount
+            'currency' => $order->getPayInCurrency(),
+            'amount' => $order->getAmount()
         ]));
 
         return $response;

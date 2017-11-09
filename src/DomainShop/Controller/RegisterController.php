@@ -5,8 +5,10 @@ namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
 use DomainShop\Entity\Order;
+use DomainShop\Entity\Pricing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Swap\Builder;
 use Zend\Diactoros\Response\RedirectResponse;
 use Zend\Expressive\Router\RouterInterface;
 use Zend\Expressive\Template\TemplateRendererInterface;
@@ -59,6 +61,22 @@ final class RegisterController implements MiddlewareInterface
                 $order->setOwnerName($submittedData['name']);
                 $order->setOwnerEmailAddress($submittedData['email_address']);
                 $order->setPayInCurrency($submittedData['currency']);
+
+                /** @var Pricing $pricing */
+                $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
+
+                if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
+                    $swap = (new Builder())
+                        ->add('fixer')
+                        ->build();
+                    $rate = $swap->latest($pricing->getCurrency() . '/' . $order->getPayInCurrency());
+
+                    $amount = (int)round($pricing->getAmount() * $rate->getValue());
+                } else {
+                    $amount = $pricing->getAmount();
+                }
+
+                $order->setAmount($amount);
 
                 Database::persist($order);
 
