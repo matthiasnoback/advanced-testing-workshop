@@ -7,12 +7,12 @@ default:
                 default:
                     goutte: ~
     suites:
-        end_to_end:
-            mink_session: default
-            paths: [ "%paths.base%/test/System/features"]
-            contexts:
-                - Test\System\FeatureContext
         acceptance:
             paths: [ "%paths.base%/test/Acceptance/features"]
             contexts:
                 - Test\Acceptance\FeatureContext
+        system:
+            mink_session: default
+            paths: [ "%paths.base%/test/System/features"]
+            contexts:
+                - Test\System\FeatureContext
