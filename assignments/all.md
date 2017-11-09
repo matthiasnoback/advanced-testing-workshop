@@ -17,22 +17,22 @@ Our application has at least one meaningful use case. You could explain to a non
 
 > Please run all the tests after every change to make sure you don't end up with an unfixable application.
 
-1. Rewrite the use cases to make them independent of the web framework (i.e. Zend Expressive). Move the code that doesn't deal with `Request` objects, routing, or template rendering to dedicated services (so-called "application services"). You may still call the real external services. We'll replace those later. 
-2. Write a scenario that describes in non-web-framework-language what's going on. E.g.
+1. Rewrite the registration use case to make it independent of the web framework (i.e. Zend Expressive). Move the code that doesn't deal with `Request` objects, routing, or template rendering to a dedicated service (a so-called "application service"). You may still call the real exchange rate service and database. We'll replace those later. 
+2. Take the following scenario that describes in non-web-framework-language what's going on and save it as `test/Acceptance/features/buy_a_domain_name.feature`:
 
-    Given I want to check the availability of totallyrandomdomainname.com
-    And it turns out to be available
-    When I register it
-    And I fill in my name ("Matthias Noback") and email address ("matthiasnoback@gmail.com")
-    And I pay EUR 10.00 for it
-    Then the domain name is mine
+    Feature:
+      Scenario:
+        Given I register "totallyrandomdomainname.com" to "Matthias Noback" with email address "matthiasnoback@gmail.com" and I want to pay in USD
+        And I pay 11.56 USD for it
+        Then the order was paid
 
 3. Create step definitions for all the steps in `Test\Acceptance\FeatureContext`. Instantiate the application services and their dependencies manually.
-4. Note that we're still depending on a lot of infrastructure (database, whois, exchange rates) and we're mainly spending time testing that code. Introduce abstractions for all of them, and provide fake objects. In order to be useful, they need methods which you can call to manually set data. Do this as part of the scenario itself, e.g.:
+4. Note that we're still depending on infrastructure code (related to the database and the exchange rate service) and we're mainly spending time testing that code. Introduce abstractions for each of these, and add fake implementations. In order to be useful, they need methods which you can call to manually set data. Do this as part of the scenario itself, e.g.:
 
-    Given the exchange rate of EUR to USD is "1.15878"
-    
-    Given the domain name totallyrandomdomainname.com is still available
+    Feature:
+      Background:
+        Given a .com domain name costs EUR 10.00
+        And the exchange rate EUR to USD is 1.156
 
 Meanwhile, take note of how much faster the acceptance tests are becoming.
 
@@ -43,9 +43,9 @@ Meanwhile, take note of how much faster the acceptance tests are becoming.
 We now have:
 
 1. System tests with the "dangerous" dependencies switched out. 
-2. Acceptance tests with specifications written in plain English, and with all the port adapters replaced by something faster and simpler ("fakes"). 
+2. An acceptance test with a specification written in plain English, and with all the port adapters replaced by something faster and simpler ("fakes"). 
 
-For each of these adapters we defined an interface; a contract for communication. Now we need to verify that our assumptions about the implementation are indeed correct. So we should write *integration tests* for all the implementations we created (e.g. the exchange rate service, the whois service, and finally the repositories). We prove that all this code functions correctly. While testing this code, we don't use any test doubles; we test *the real thing*. We make a real call over the network to the Fixer exchange rate service, we make a real network call to the `whois` service, and we store real files.
+For each of these adapters we defined an interface; a contract for communication. Now we need to verify that our assumptions about the implementation are indeed correct. So we should write *integration tests* for all the implementations we created (e.g. the exchange rate service and the repositories). We prove that all this code functions correctly. While testing this code, we don't use any test doubles; we test *the real thing*. We make a real call over the network to the Fixer exchange rate service and we store real files.
 
 > Note that any errors in our assumptions, any mistake we made in interpreting the external service's API documentation, any failure on their side (a failed release, a backwards compatibility break, etc.), will show up while running the integration tests. This is a huge improvement on the current situation, because without integration tests, the problem would jump in our face when running the system tests; and in that case, who could tell us immediately what's wrong?  
 
@@ -57,7 +57,7 @@ Find ways to restructure the code, and migrate the model from an anemic one, wit
 
 Find ways to encapsulate domain concepts like "email address", "currency", "amount", "domain name", etc. Make sure that every domain object can only exist in a complete, consistent, and valid state.
 
-While you're at it, you can clean up the code in the `PayController` and extract a class which simply calculates the price, using the exchange service, and the pricing repository.
+While you're at it, you can clean up the code in the `RegisterController` and extract a class which simply calculates the price, using the exchange service, and the pricing repository.
 
 # Working effectively with tests
 
@@ -68,8 +68,8 @@ In order to not be held back by the test suite, you need to be able to:
 
 In order to do this, you could use some or all of the following:
 
-- PHPUnit groups & filters
-- Behat tags
+- PHPUnit suites, groups & filters
+- Behat suites and tags
 - Step debugging (using XDebug)
 - Maximal verbosity of command line output
 - Special error renderers that don't spit out a lot of HTML (when running your system tests)
