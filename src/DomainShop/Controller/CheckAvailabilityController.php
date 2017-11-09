@@ -28,11 +28,11 @@ final class CheckAvailabilityController implements MiddlewareInterface
         if (!isset($submittedData['domain_name'])) {
             throw new \RuntimeException('No domain name provided');
         }
-        if (!preg_match('/^\w+\.\w+$/', $submittedData['domain_name'])) {
-            throw new \RuntimeException('Invalid domain name provided');
-        }
 
         $domainName = $submittedData['domain_name'];
+        if (!preg_match('/^\w+\.\w+$/', $domainName)) {
+            throw new \RuntimeException('Invalid domain name provided');
+        }
 
         $parser = new Parser();
         $parser->throwExceptions(true);
