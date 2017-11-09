@@ -12,7 +12,7 @@ services:
             XDEBUG_CONFIG: "remote_host=${DOCKER_HOST_IP}"
             PHP_IDE_CONFIG: "serverName=web"
             DB_PATH: /opt/var
-            ENV: development
+            APPLICATION_ENV: development
         user: ${HOST_UID}:${HOST_GID}
 
     devtools:

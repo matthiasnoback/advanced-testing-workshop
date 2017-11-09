@@ -25,7 +25,7 @@ Debug::enable();
 
 $container = new Container();
 
-$applicationEnv = getenv('ENV') ?: 'development';
+$applicationEnv = getenv('APPLICATION_ENV') ?: 'development';
 $container['config'] = [
     'middleware_pipeline' => [
         'routing' => [
