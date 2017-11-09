@@ -10,7 +10,8 @@ require __DIR__ . '/../bootstrap.php';
 if (getenv('COLLECT_CODE_COVERAGE')) {
     LiveCodeCoverage::bootstrap(
         __DIR__ . '/../var/coverage',
-        __DIR__ . '/../phpunit.xml.dist'
+        __DIR__ . '/../phpunit.xml.dist',
+        $_COOKIE['coverage_id'] ?? 'live-coverage'
     );
 }
 
