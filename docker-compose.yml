@@ -25,4 +25,5 @@ services:
             COMPOSER_HOME: /home/.composer
             XDEBUG_CONFIG: "remote_host=${DOCKER_HOST_IP}"
             WEB_HOSTNAME: web
+            DB_PATH: /opt/var
         user: ${HOST_UID}:${HOST_GID}
