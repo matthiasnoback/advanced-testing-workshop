@@ -6,4 +6,4 @@ services:
             ENV: testing
             # Add any other test-specific environment variable here, e.g.
             SERVER_TIME: "2017-11-07 10:00:00"
-            COLLECT_CODE_COVERAGE: "1"
+#            COLLECT_CODE_COVERAGE: "1"
