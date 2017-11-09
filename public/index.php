@@ -5,7 +5,7 @@ use Interop\Container\ContainerInterface;
 use LiveCodeCoverage\LiveCodeCoverage;
 use Zend\Expressive\Application;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/../bootstrap.php';
 
 if (getenv('COLLECT_CODE_COVERAGE')) {
     LiveCodeCoverage::bootstrap(
