@@ -5,7 +5,7 @@ services:
         image: matthiasnoback/php_workshop_tools_simple_webserver
         command: public/
         volumes:
-            - ./:/opt
+            - ./:/opt:cached
         ports:
             - 8080:8080
         environment:
@@ -19,8 +19,8 @@ services:
         build: docker/devtools/
         image: matthiasnoback/advanced_testing_workshop_devtools
         volumes:
-            - ./:/opt
-            - ${COMPOSER_HOME}:/home/.composer
+            - ./:/opt:cached
+            - ${COMPOSER_HOME}:/home/.composer:cached
         environment:
             COMPOSER_HOME: /home/.composer
             XDEBUG_CONFIG: "remote_host=${DOCKER_HOST_IP}"
