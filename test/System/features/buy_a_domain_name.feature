@@ -18,6 +18,7 @@ Feature:
     When I press "Pay"
     Then I should see "You are now the owner of totallyrandomdomainname.com"
 
+  @wip
   Scenario: Trying to buy an unavailable domain name
     Given I am on the homepage
     When I fill in "Domain name" with "google.com"
