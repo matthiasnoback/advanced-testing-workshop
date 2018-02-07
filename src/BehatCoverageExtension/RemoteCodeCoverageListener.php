@@ -27,7 +27,7 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
     /**
      * @var string
      */
-    private $testRunId;
+    private $coverageGroup;
 
     /**
      * @var bool
@@ -56,7 +56,7 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
             return;
         }
 
-        $this->testRunId = uniqid($event->getSuite()->getName(), true);
+        $this->coverageGroup = uniqid($event->getSuite()->getName(), true);
     }
 
     public function beforeScenario(ScenarioLikeTested $event)
@@ -67,7 +67,7 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
         $coverageId = $event->getFeature()->getFile() . ':' . $event->getNode()->getLine();
 
-        $this->mink->getSession('default')->setCookie('test_run_id', $this->testRunId);
+        $this->mink->getSession('default')->setCookie('coverage_group', $this->coverageGroup);
         $this->mink->getSession('default')->setCookie('coverage_id', $coverageId);
     }
 
@@ -79,7 +79,7 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
         // TODO use Mink Session Driver
         $coverage = unserialize(
-            file_get_contents('http://web:8080/?export_code_coverage=true&test_run_id=' . $this->testRunId)
+            file_get_contents('http://web:8080/?export_code_coverage=true&coverage_group=' . $this->coverageGroup)
         );
 
         Storage::storeCodeCoverage($coverage, $this->targetDirectory, $event->getSuite()->getName());
