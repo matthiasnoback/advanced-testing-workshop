@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace BehatRemoteCodeCoverage;
 
+use Webmozart\Assert\Assert;
 use Behat\Behat\EventDispatcher\Event\ScenarioLikeTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Mink\Mink;
@@ -34,9 +35,24 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
      */
     private $coverageEnabled = false;
 
-    public function __construct(Mink $mink, $targetDirectory)
+    /**
+     * @var string
+     */
+    private $defaultMinkSession;
+
+    /**
+     * @var string
+     */
+    private $minkSession;
+
+    public function __construct(Mink $mink, $defaultMinkSession, $targetDirectory)
     {
         $this->mink = $mink;
+
+        $this->defaultMinkSession = $defaultMinkSession;
+        Assert::string($defaultMinkSession, 'Default Mink session should be a string');
+
+        Assert::string($targetDirectory, 'Coverage target directory should be a string');
         $this->targetDirectory = $targetDirectory;
     }
 
@@ -53,10 +69,13 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
     {
         $this->coverageEnabled = $event->getSuite()->hasSetting('remote_coverage_enabled')
             && $event->getSuite()->getSetting('remote_coverage_enabled');
+
         if (!$this->coverageEnabled) {
             return;
         }
 
+        $this->minkSession = $event->getSuite()->hasSetting('mink_session') ?
+            $event->getSuite()->getSetting('mink_session') : $this->defaultMinkSession;
         $this->coverageGroup = uniqid($event->getSuite()->getName(), true);
     }
 
@@ -68,9 +87,9 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
         $coverageId = $event->getFeature()->getFile() . ':' . $event->getNode()->getLine();
 
-        $this->mink->getSession('default')->setCookie('collect_code_coverage', true);
-        $this->mink->getSession('default')->setCookie('coverage_group', $this->coverageGroup);
-        $this->mink->getSession('default')->setCookie('coverage_id', $coverageId);
+        $this->mink->getSession($this->minkSession)->setCookie('collect_code_coverage', true);
+        $this->mink->getSession($this->minkSession)->setCookie('coverage_group', $this->coverageGroup);
+        $this->mink->getSession($this->minkSession)->setCookie('coverage_id', $coverageId);
     }
 
     public function afterSuite(AfterSuiteTested $event)

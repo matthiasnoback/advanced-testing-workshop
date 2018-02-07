@@ -3,6 +3,7 @@ services:
         class: BehatRemoteCodeCoverage\RemoteCodeCoverageListener
         arguments:
             - '@mink'
+            - '%mink.default_session%'
             - '%remote_code_coverage.target_directory%'
         tags:
             - { name: event_dispatcher.subscriber }
