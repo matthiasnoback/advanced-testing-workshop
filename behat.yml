@@ -6,19 +6,19 @@ default:
             sessions:
                 default:
                     goutte: ~
-        BehatCoverageExtension\BehatCoverageExtension:
-            coverage_target_directory: '%paths.base%/var/coverage'
+        BehatLocalCodeCoverage\LocalCodeCoverageExtension:
+            target_directory: '%paths.base%/var/coverage'
+        BehatRemoteCodeCoverage\RemoteCodeCoverageExtension:
+            target_directory: '%paths.base%/var/coverage'
     suites:
         acceptance:
             paths: [ "%paths.base%/test/Acceptance/features"]
             contexts:
                 - Test\Acceptance\FeatureContext
             local_coverage_enabled: true
-            remote_coverage_enabled: false
         end_to_end:
             mink_session: default
             paths: [ "%paths.base%/test/System/features"]
             contexts:
                 - Test\System\FeatureContext
-            local_coverage_enabled: false
             remote_coverage_enabled: true

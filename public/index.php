@@ -8,7 +8,7 @@ use Zend\Expressive\Application;
 require __DIR__ . '/../vendor/autoload.php';
 
 $shutDownCodeCoverage = LiveCodeCoverage::bootstrapRemoteCoverage(
-    function() { return (bool)getenv('CODE_COVERAGE_ENABLED'); },
+    (bool)getenv('CODE_COVERAGE_ENABLED'),
     sys_get_temp_dir(),
     __DIR__ . '/../phpunit.xml.dist'
 );

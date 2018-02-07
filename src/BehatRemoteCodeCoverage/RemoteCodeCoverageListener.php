@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace BehatCoverageExtension;
+namespace BehatRemoteCodeCoverage;
 
 use Behat\Behat\EventDispatcher\Event\ScenarioLikeTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
@@ -51,7 +51,8 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
     public function beforeSuite(BeforeSuiteTested $event)
     {
-        $this->coverageEnabled = $event->getSuite()->getSetting('remote_coverage_enabled');
+        $this->coverageEnabled = $event->getSuite()->hasSetting('remote_coverage_enabled')
+            && $event->getSuite()->getSetting('remote_coverage_enabled');
         if (!$this->coverageEnabled) {
             return;
         }
@@ -67,6 +68,7 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
         $coverageId = $event->getFeature()->getFile() . ':' . $event->getNode()->getLine();
 
+        $this->mink->getSession('default')->setCookie('collect_code_coverage', true);
         $this->mink->getSession('default')->setCookie('coverage_group', $this->coverageGroup);
         $this->mink->getSession('default')->setCookie('coverage_id', $coverageId);
     }
@@ -84,6 +86,13 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
         Storage::storeCodeCoverage($coverage, $this->targetDirectory, $event->getSuite()->getName());
 
+        $this->reset();
+    }
+
+    private function reset()
+    {
         $this->coverage = null;
+        $this->coverageGroup = null;
+        $this->coverageEnabled = false;
     }
 }

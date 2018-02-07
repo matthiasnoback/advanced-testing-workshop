@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace BehatCoverageExtension;
+namespace BehatLocalCodeCoverage;
 
 use Behat\Behat\EventDispatcher\Event\ScenarioLikeTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
@@ -47,7 +47,8 @@ final class LocalCodeCoverageListener implements EventSubscriberInterface
 
     public function beforeSuite(SuiteTested $event)
     {
-        $this->coverageEnabled = (bool)$event->getSuite()->getSetting('local_coverage_enabled');
+        $this->coverageEnabled = $event->getSuite()->hasSetting('local_coverage_enabled')
+            && (bool)$event->getSuite()->getSetting('local_coverage_enabled');
     }
 
     public function beforeScenario(ScenarioLikeTested $event)
@@ -78,6 +79,12 @@ final class LocalCodeCoverageListener implements EventSubscriberInterface
 
         Storage::storeCodeCoverage($this->coverage, $this->targetDirectory, $event->getSuite()->getName());
 
+        $this->reset();
+    }
+
+    private function reset()
+    {
         $this->coverage = null;
+        $this->coverageEnabled = false;
     }
 }
