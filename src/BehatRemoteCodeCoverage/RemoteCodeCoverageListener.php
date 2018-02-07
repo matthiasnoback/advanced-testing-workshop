@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace BehatRemoteCodeCoverage;
 
+use Behat\Mink\Driver\BrowserKitDriver;
+use Behat\Mink\Session;
 use Webmozart\Assert\Assert;
 use Behat\Behat\EventDispatcher\Event\ScenarioLikeTested;
 use Behat\Behat\EventDispatcher\Event\ScenarioTested;
@@ -87,9 +89,9 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
 
         $coverageId = $event->getFeature()->getFile() . ':' . $event->getNode()->getLine();
 
-        $this->mink->getSession($this->minkSession)->setCookie('collect_code_coverage', true);
-        $this->mink->getSession($this->minkSession)->setCookie('coverage_group', $this->coverageGroup);
-        $this->mink->getSession($this->minkSession)->setCookie('coverage_id', $coverageId);
+        $this->getMinkSession()->setCookie('collect_code_coverage', true);
+        $this->getMinkSession()->setCookie('coverage_group', $this->coverageGroup);
+        $this->getMinkSession()->setCookie('coverage_id', $coverageId);
     }
 
     public function afterSuite(AfterSuiteTested $event)
@@ -98,10 +100,17 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
             return;
         }
 
-        // TODO use Mink Session Driver
-        $coverage = unserialize(
-            file_get_contents('http://web:8080/?export_code_coverage=true&coverage_group=' . $this->coverageGroup)
+        $driver = $this->getMinkSession()->getDriver();
+        if (!$driver instanceof BrowserKitDriver) {
+            throw new \RuntimeException('Mink driver not supported');
+        }
+
+        $driver->getClient()->request(
+            'GET',
+            '/?export_code_coverage=true&coverage_group=' . urlencode($this->coverageGroup)
         );
+
+        $coverage = unserialize($driver->getClient()->getResponse()->getContent());
 
         Storage::storeCodeCoverage($coverage, $this->targetDirectory, $event->getSuite()->getName());
 
@@ -113,5 +122,13 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
         $this->coverage = null;
         $this->coverageGroup = null;
         $this->coverageEnabled = false;
+    }
+
+    /**
+     * @return Session
+     */
+    private function getMinkSession()
+    {
+        return $this->mink->getSession($this->minkSession);
     }
 }
