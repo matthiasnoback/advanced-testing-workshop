@@ -8,6 +8,7 @@ use Behat\Behat\EventDispatcher\Event\ScenarioTested;
 use Behat\Testwork\EventDispatcher\Event\AfterSuiteTested;
 use Behat\Testwork\EventDispatcher\Event\SuiteTested;
 use LiveCodeCoverage\CodeCoverageFactory;
+use LiveCodeCoverage\Storage;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -75,10 +76,7 @@ final class LocalCodeCoverageListener implements EventSubscriberInterface
             return;
         }
 
-        // TODO delegate to utility
-        $cov = '<?php return unserialize(' . var_export(serialize($this->coverage), true) . ');';
-        $coveragePathname = $this->targetDirectory . '/' . $event->getSuite()->getName() . '.cov';
-        file_put_contents($coveragePathname, $cov);
+        Storage::storeCodeCoverage($this->coverage, $this->targetDirectory, $event->getSuite()->getName());
 
         $this->coverage = null;
     }

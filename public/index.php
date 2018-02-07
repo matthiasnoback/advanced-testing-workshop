@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 use BehatCoverageExtension\RemoteCodeCoverage;
 use Interop\Container\ContainerInterface;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
+use LiveCodeCoverage\Storage;
 use Zend\Expressive\Application;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -11,22 +11,11 @@ require __DIR__ . '/../vendor/autoload.php';
 $coverageRoot = sys_get_temp_dir();
 
 if (isset($_GET['export_code_coverage'], $_GET['test_run_id'])) {
-    $codeCoverage = new CodeCoverage();
-
     $coverageDirectory = $coverageRoot . '/' . $_GET['test_run_id'];
 
-    if (is_dir($coverageDirectory)) {
-        $dir = new DirectoryIterator($coverageDirectory);
-        foreach ($dir as $fileInfo) {
-            if ($fileInfo->isDot()) {
-                continue;
-            }
-            $partialCodeCoverage = include $fileInfo->getPathname();
+    $codeCoverage = Storage::loadFromDirectory($coverageDirectory);
 
-            $codeCoverage->merge($partialCodeCoverage);
-        }
-    }
-
+    header('Content-Type: text/plain');
     echo serialize($codeCoverage);
     exit;
 }

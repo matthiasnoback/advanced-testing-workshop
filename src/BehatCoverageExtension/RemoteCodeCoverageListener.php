@@ -9,8 +9,7 @@ use Behat\Mink\Mink;
 use Behat\Testwork\EventDispatcher\Event\AfterSuiteTested;
 use Behat\Testwork\EventDispatcher\Event\BeforeSuiteTested;
 use Behat\Testwork\EventDispatcher\Event\SuiteTested;
-use LiveCodeCoverage\CodeCoverageFactory;
-use SebastianBergmann\CodeCoverage\CodeCoverage;
+use LiveCodeCoverage\Storage;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class RemoteCodeCoverageListener implements EventSubscriberInterface
@@ -23,17 +22,7 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
     /**
      * @var string
      */
-    private $phpunitXmlPath;
-
-    /**
-     * @var string
-     */
     private $targetDirectory;
-
-    /**
-     * @var CodeCoverage
-     */
-    private $coverage;
 
     /**
      * @var string
@@ -45,10 +34,9 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
      */
     private $coverageEnabled = false;
 
-    public function __construct(Mink $mink, $phpunitXmlPath, $targetDirectory)
+    public function __construct(Mink $mink, $targetDirectory)
     {
         $this->mink = $mink;
-        $this->phpunitXmlPath = $phpunitXmlPath;
         $this->targetDirectory = $targetDirectory;
     }
 
@@ -68,7 +56,6 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
             return;
         }
 
-        $this->coverage = CodeCoverageFactory::createFromPhpUnitConfiguration($this->phpunitXmlPath);
         $this->testRunId = uniqid($event->getSuite()->getName(), true);
     }
 
@@ -91,15 +78,11 @@ final class RemoteCodeCoverageListener implements EventSubscriberInterface
         }
 
         // TODO use Mink Session Driver
-        $coverageData = unserialize(
+        $coverage = unserialize(
             file_get_contents('http://web:8080/?export_code_coverage=true&test_run_id=' . $this->testRunId)
         );
-        $this->coverage->merge($coverageData);
 
-        // TODO delegate to utility
-        $cov = '<?php return unserialize(' . var_export(serialize($this->coverage), true) . ');';
-        $filePath = $this->targetDirectory . '/' . $event->getSuite()->getName() . '.cov';
-        file_put_contents($filePath, $cov);
+        Storage::storeCodeCoverage($coverage, $this->targetDirectory, $event->getSuite()->getName());
 
         $this->coverage = null;
     }

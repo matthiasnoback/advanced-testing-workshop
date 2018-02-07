@@ -3,7 +3,6 @@ services:
         class: \BehatCoverageExtension\RemoteCodeCoverageListener
         arguments:
             - '@mink'
-            - '%behat_coverage_extension.phpunit_xml_path%'
             - '%behat_coverage_extension.coverage_target_directory%'
         tags:
             - { name: event_dispatcher.subscriber }
