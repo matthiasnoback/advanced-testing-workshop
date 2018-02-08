@@ -2,7 +2,7 @@ default:
     extensions:
         Test\System\DynamicBaseUrlExtension: ~
         Behat\MinkExtension:
-            base_url:  'http://%web_hostname%:8080/'
+            base_url:  'http://%web_hostname%'
             sessions:
                 default:
                     goutte: ~

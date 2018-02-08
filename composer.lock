@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6247439e5667cd9365e1a0408dc26c29",
+    "content-hash": "eab471bf59d0396615e42a7db2d4ca0f",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -4586,16 +4586,16 @@
         },
         {
             "name": "matthiasnoback/behat-local-code-coverage-extension",
-            "version": "v0.1.0",
+            "version": "v0.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/matthiasnoback/behat-local-code-coverage-extension.git",
-                "reference": "c2dc6cab7da618474317d5f14f06c56804e1dab4"
+                "reference": "5114304d6f87f36e63aa4e86442d1069e46d716a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/matthiasnoback/behat-local-code-coverage-extension/zipball/c2dc6cab7da618474317d5f14f06c56804e1dab4",
-                "reference": "c2dc6cab7da618474317d5f14f06c56804e1dab4",
+                "url": "https://api.github.com/repos/matthiasnoback/behat-local-code-coverage-extension/zipball/5114304d6f87f36e63aa4e86442d1069e46d716a",
+                "reference": "5114304d6f87f36e63aa4e86442d1069e46d716a",
                 "shasum": ""
             },
             "require": {
@@ -4610,7 +4610,7 @@
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
-            "time": "2018-02-07T19:18:12+00:00"
+            "time": "2018-02-07T20:20:59+00:00"
         },
         {
             "name": "matthiasnoback/behat-remote-code-coverage-extension",

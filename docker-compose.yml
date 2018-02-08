@@ -2,24 +2,37 @@ version: '3'
 
 services:
     web:
-        image: matthiasnoback/php_workshop_tools_simple_webserver
-        command: public/
+        image: matthiasnoback/advanced_testing_workshop_nginx
+        build: docker/nginx/
+        depends_on:
+            - php-fpm
         volumes:
-            - ./:/opt
+            - ./:/opt:cached
         ports:
-            - 8080:8080
+            - 80:80
+        environment:
+            SERVER_NAME: web
+            ROOT: /opt/public/
+            PHP_BACKEND: php-fpm
+
+    php-fpm:
+        image: matthiasnoback/advanced_testing_workshop_php_fpm
+        build: docker/php-fpm/
+        user: ${HOST_UID}:${HOST_GID}
+        volumes:
+            - ./:/opt:cached
         environment:
             XDEBUG_CONFIG: "remote_host=${DOCKER_HOST_IP}"
             PHP_IDE_CONFIG: "serverName=web"
             DB_PATH: /opt/var
             ENV: development
-        user: ${HOST_UID}:${HOST_GID}
 
     devtools:
         build: docker/devtools/
+        command: php -v
         image: matthiasnoback/advanced_testing_workshop_devtools
         volumes:
-            - ./:/opt
+            - ./:/opt:cached
             - ${COMPOSER_HOME}:/home/.composer
         environment:
             COMPOSER_HOME: /home/.composer

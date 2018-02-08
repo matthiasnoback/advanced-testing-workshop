@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-    web:
+    php-fpm:
         environment:
             ENV: testing
             # Add any other test-specific environment variable here, e.g.
