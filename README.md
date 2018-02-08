@@ -1,4 +1,4 @@
-# Code and assignments for the "Advanced Testing" workshop module
+# Code and assignments for the "Advanced Application Testing" workshop module
 
 ## Requirements
 
@@ -11,9 +11,8 @@
 - Clone this repository and `cd` into it.
 - Run `docker-compose pull`.
 - Run `bin/composer.sh install --prefer-dist` to install the project's dependencies.
-- [Configure PhpStorm for debugging](https://github.com/matthiasnoback/php-workshop-tools/blob/master/README.md) (optional).
 - Run `docker-compose up -d` to start the web server.
-- Go to [http://localhost:8080/](http://localhost:8080/) in a browser. You should see the homepage of the meetup application.
+- Go to [http://localhost/](http://localhost/) in a browser. You should see the homepage of the application.
 
 ## Running development tools
 

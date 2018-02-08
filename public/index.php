@@ -1,19 +1,17 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 use Interop\Container\ContainerInterface;
-use LiveCodeCoverage\LiveCodeCoverage;
+use LiveCodeCoverage\RemoteCodeCoverage;
 use Zend\Expressive\Application;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../vendor/autoload.php';
 
-if (getenv('COLLECT_CODE_COVERAGE')) {
-    LiveCodeCoverage::bootstrap(
-        __DIR__ . '/../var/coverage',
-        __DIR__ . '/../phpunit.xml.dist',
-        $_COOKIE['coverage_id'] ?? 'live-coverage'
-    );
-}
+$shutDownCodeCoverage = RemoteCodeCoverage::bootstrap(
+    (bool)getenv('CODE_COVERAGE_ENABLED'),
+    sys_get_temp_dir(),
+    __DIR__ . '/../phpunit.xml.dist'
+);
 
 /** @var ContainerInterface $container */
 $container = require __DIR__ . '/../app/container.php';
@@ -21,3 +19,5 @@ $container = require __DIR__ . '/../app/container.php';
 /** @var Application $app */
 $app = $container[Application::class];
 $app->run();
+
+$shutDownCodeCoverage();

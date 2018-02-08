@@ -2,17 +2,23 @@ default:
     extensions:
         Test\System\DynamicBaseUrlExtension: ~
         Behat\MinkExtension:
-            base_url:  'http://%web_hostname%:8080/'
+            base_url:  'http://%web_hostname%'
             sessions:
                 default:
                     goutte: ~
+        BehatLocalCodeCoverage\LocalCodeCoverageExtension:
+            target_directory: '%paths.base%/var/coverage'
+        BehatRemoteCodeCoverage\RemoteCodeCoverageExtension:
+            target_directory: '%paths.base%/var/coverage'
     suites:
         acceptance:
             paths: [ "%paths.base%/test/Acceptance/features"]
             contexts:
                 - Test\Acceptance\FeatureContext
+            local_coverage_enabled: true
         system:
             mink_session: default
             paths: [ "%paths.base%/test/System/features"]
             contexts:
                 - Test\System\FeatureContext
+            remote_coverage_enabled: true
