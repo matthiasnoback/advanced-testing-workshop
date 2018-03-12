@@ -26,12 +26,12 @@ final class FeatureContext implements Context
     private $orderId;
 
     /**
-     * @var FileBasedPricingRepository
+     * @var InMemoryPricingRepository
      */
     private $pricingRepository;
 
     /**
-     * @var FileBasedOrderRepository
+     * @var InMemoryOrderRepository
      */
     private $orderRepository;
 
