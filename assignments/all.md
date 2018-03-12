@@ -20,19 +20,22 @@ Our application has at least one meaningful use case. You could explain to a non
 1. Rewrite the registration use case to make it independent of the web framework (i.e. Zend Expressive). Move the code that doesn't deal with `Request` objects, routing, or template rendering to a dedicated service (a so-called "application service"). You may still call the real exchange rate service and database. We'll replace those later. 
 2. Take the following scenario that describes in non-web-framework-language what's going on and save it as `test/Acceptance/features/buy_a_domain_name.feature`:
 
-    Feature:
-      Scenario:
-        Given I register "totallyrandomdomainname.com" to "Matthias Noback" with email address "matthiasnoback@gmail.com" and I want to pay in USD
-        And I pay 11.56 USD for it
-        Then the order was paid
+        Feature:
+          Scenario:
+            Given I register "totallyrandomdomainname.com" to "Matthias Noback" with email address "matthiasnoback@gmail.com" and I want to pay in USD
+            And I pay 11.56 USD for it
+            Then the order was paid
 
 3. Create step definitions for all the steps in `Test\Acceptance\FeatureContext`. Instantiate the application services and their dependencies manually.
 4. Note that we're still depending on infrastructure code (related to the database and the exchange rate service) and we're mainly spending time testing that code. Introduce abstractions for each of these, and add fake implementations. In order to be useful, they need methods which you can call to manually set data. Do this as part of the scenario itself, e.g.:
 
-    Feature:
-      Background:
-        Given a .com domain name costs EUR 10.00
-        And the exchange rate EUR to USD is 1.156
+        Feature:
+          Background:
+            Given a .com domain name costs EUR 10.00
+            And the exchange rate EUR to USD is 1.156
+            
+          Scenario:
+            # ...
 
 Meanwhile, take note of how much faster the acceptance tests are becoming.
 
