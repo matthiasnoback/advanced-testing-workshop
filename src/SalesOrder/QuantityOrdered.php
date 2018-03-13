@@ -23,4 +23,14 @@ final class QuantityOrdered
     {
         return $this->quantity;
     }
+
+    public function calculateQuantityOpen(QuantityDelivered $quantityDelivered): QuantityOpen
+    {
+        $quantityOpen = $this->quantity - $quantityDelivered->asFloat();
+        if ($quantityOpen < 0) {
+            $quantityOpen = 0;
+        }
+
+        return new QuantityOpen($quantityOpen);
+    }
 }

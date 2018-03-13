@@ -34,4 +34,34 @@ final class QuantityOrderedTest extends \PHPUnit_Framework_TestCase
 
         self::assertEquals(2, $quantityOrdered->asFloat());
     }
+
+    /**
+     * @test
+     */
+    public function it_can_tell_how_much_is_open_based_on_the_quantity_delivered()
+    {
+        $quantityOrdered = new QuantityOrdered(3);
+
+        $quantityDelivered = new QuantityDelivered(2);
+
+        self::assertEquals(
+            new QuantityOpen(1),
+            $quantityOrdered->calculateQuantityOpen($quantityDelivered)
+        );
+    }
+
+    /**
+     * @test
+     */
+    public function quantity_open_will_be_0_in_case_of_over_delivery()
+    {
+        $quantityOrdered = new QuantityOrdered(2);
+
+        $quantityDelivered = new QuantityDelivered(3);
+
+        self::assertEquals(
+            new QuantityOpen(0),
+            $quantityOrdered->calculateQuantityOpen($quantityDelivered)
+        );
+    }
 }
