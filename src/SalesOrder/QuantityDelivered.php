@@ -23,4 +23,22 @@ final class QuantityDelivered
     {
         return $this->quantity;
     }
+
+    public function add(DeliveryQuantity $deliveryQuantity): QuantityDelivered
+    {
+        return new self(
+            $this->quantity + $deliveryQuantity->asFloat()
+        );
+    }
+
+    public function subtract(DeliveryQuantity $deliveryQuantity): QuantityDelivered
+    {
+        $newQuantity = $this->quantity - $deliveryQuantity->asFloat();
+
+        if ($newQuantity < 0) {
+            $newQuantity = 0;
+        }
+
+        return new self($newQuantity);
+    }
 }
