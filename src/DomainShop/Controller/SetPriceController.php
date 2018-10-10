@@ -16,7 +16,7 @@ final class SetPriceController implements MiddlewareInterface
         $submittedData = $request->getParsedBody();
 
         try {
-            $pricing = Database::retrieve(Pricing::class, $submittedData['currency']);
+            $pricing = Database::retrieve(Pricing::class, $submittedData['extension']);
         } catch (\RuntimeException $exception) {
             $pricing = new Pricing();
             $pricing->setExtension($submittedData['extension']);
