@@ -5,10 +5,12 @@ namespace Test\Acceptance;
 use Behat\Behat\Context\Context;
 use Behat\Behat\Tester\Exception\PendingException;
 use Common\Persistence\Database;
+use DomainShop\Application\ExchangeRateProvider;
 use DomainShop\Application\PayForOrderService;
 use DomainShop\Application\RegisterDomainName;
 use DomainShop\Application\SetPriceService;
 use DomainShop\Entity\Order;
+use DomainShop\Infrastructure\FixedExchangeRate;
 use PHPUnit\Framework\Assert;
 
 final class FeatureContext implements Context
@@ -68,10 +70,12 @@ final class FeatureContext implements Context
     }
 
     /**
-     * @Given the exchange rate EUR to USD is :arg1
+     * @Given the exchange rate :fromCurrency to :toCurrency is :amount
      */
-    public function theExchangeRateEurToUsdIs($arg1)
+    public function theExchangeRateEurToUsdIs($fromCurrency, $toCurrency, $amount)
     {
-        throw new PendingException();
+        /** @var FixedExchangeRate $exchangeRateProvider */
+        $exchangeRateProvider = $this->container->get(ExchangeRateProvider::class);
+        $exchangeRateProvider->setExchangeRate($fromCurrency, $toCurrency, $amount);
     }
 }

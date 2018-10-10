@@ -1,6 +1,6 @@
 Feature:
   Background:
-    Given a .com domain name costs EUR 10.00
+    Given a ".com" domain name costs EUR 10.00
     And the exchange rate EUR to USD is 1.156
 
   Scenario:

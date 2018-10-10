@@ -21,6 +21,14 @@ use DomainShop\Application\ExchangeRateProvider;
  */
 class FixedExchangeRate implements ExchangeRateProvider
 {
+    private $rates = [];
+
+    public function setExchangeRate(string $fromCurrency, string $toCurrency, float $exchangeRate): void
+    {
+        $key = $fromCurrency . '/' . $toCurrency;
+        $this->rates[$key] = $exchangeRate;
+    }
+
     public function getExchangeRate(string $fromCurrency, string $toCurrency): float
     {
         $rates = [
