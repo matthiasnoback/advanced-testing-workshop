@@ -1,6 +1,7 @@
 <?php
 
 use DomainShop\Application\ExchangeRateProvider;
+use DomainShop\Application\PayForOrderService;
 use DomainShop\Application\RegisterDomainName;
 use DomainShop\Controller\CheckAvailabilityController;
 use DomainShop\Controller\FinishController;
@@ -148,7 +149,8 @@ $container[RegisterController::class] = function (ContainerInterface $container)
 $container[PayController::class] = function (ContainerInterface $container) {
     return new PayController(
         $container->get(RouterInterface::class),
-        $container->get(TemplateRendererInterface::class)
+        $container->get(TemplateRendererInterface::class),
+        $container->get(PayForOrderService::class)
     );
 };
 $container[FinishController::class] = function (ContainerInterface $container) {
@@ -177,6 +179,10 @@ $container[ExchangeRateProvider::class] = function (ContainerInterface $containe
 
 $container[RegisterDomainName::class] = function (ContainerInterface $container) {
     return new RegisterDomainName($container->get(ExchangeRateProvider::class));
+};
+
+$container[PayForOrderService::class] = function () {
+    return new PayForOrderService();
 };
 
 return $container;
