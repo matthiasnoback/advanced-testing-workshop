@@ -1,5 +1,6 @@
 <?php
 
+use DomainShop\Application\ExchangeRateProvider;
 use DomainShop\Controller\CheckAvailabilityController;
 use DomainShop\Controller\FinishController;
 use DomainShop\Controller\HomepageController;
@@ -8,6 +9,8 @@ use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
 use DomainShop\Domain\Clock;
 use DomainShop\Infrastructure\FixedClock;
+use DomainShop\Infrastructure\FixedExchangeRate;
+use DomainShop\Infrastructure\SwapFixer;
 use DomainShop\Infrastructure\SystemClock;
 use DomainShop\Resources\Views\TwigTemplates;
 use Interop\Container\ContainerInterface;
@@ -138,7 +141,7 @@ $container[RegisterController::class] = function (ContainerInterface $container)
     return new RegisterController(
         $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class),
-        $container->get(Clock::class)
+        $container->get(ExchangeRateProvider::class)
     );
 };
 $container[PayController::class] = function (ContainerInterface $container) {
@@ -162,6 +165,13 @@ $container[Clock::class] = function () use ($applicationEnv) {
     }
 
     return new SystemClock();
+};
+
+$container[ExchangeRateProvider::class] = function (ContainerInterface $container) use ($applicationEnv){
+    if ('testing' === $applicationEnv) {
+        return new FixedExchangeRate();
+    }
+    return new SwapFixer($container->get(Clock::class));
 };
 
 return $container;

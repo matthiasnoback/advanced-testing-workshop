@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
+use DomainShop\Application\ExchangeRateProvider;
 use DomainShop\Domain\Clock;
 use DomainShop\Entity\Order;
 use DomainShop\Entity\Pricing;
@@ -26,15 +27,17 @@ final class RegisterController implements MiddlewareInterface
      * @var TemplateRendererInterface
      */
     private $renderer;
+    /** @var ExchangeRateProvider */
+    private $exchangeRateProvider;
 
-    /** @var Clock */
-    private $clock;
-
-    public function __construct(RouterInterface $router, TemplateRendererInterface $renderer, Clock $clock)
-    {
+    public function __construct(
+        RouterInterface $router,
+        TemplateRendererInterface $renderer,
+        ExchangeRateProvider $exchangeRateProvider
+    ) {
         $this->router = $router;
         $this->renderer = $renderer;
-        $this->clock = $clock;
+        $this->exchangeRateProvider = $exchangeRateProvider;
     }
 
     public function __invoke(Request $request, Response $response, callable $out = null)
@@ -71,15 +74,11 @@ final class RegisterController implements MiddlewareInterface
                 $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
 
                 if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
-                    $swap = (new Builder())
-                        ->add('fixer', ['access_key' => 'e495bd221c904b9155f76e130814d567'])
-                        ->build();
-                    $rate = $swap->historical(
-                        $pricing->getCurrency() . '/' . $order->getPayInCurrency(),
-                        $this->clock->getCurrentTime()
+                    $rate = $this->exchangeRateProvider->getExchangeRate(
+                        $pricing->getCurrency(),
+                        $order->getPayInCurrency()
                     );
-
-                    $amount = (int)round($pricing->getAmount() * $rate->getValue());
+                    $amount = (int)round($pricing->getAmount() * $rate);
                 } else {
                     $amount = $pricing->getAmount();
                 }
