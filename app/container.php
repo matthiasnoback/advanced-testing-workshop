@@ -3,6 +3,7 @@
 use DomainShop\Application\ExchangeRateProvider;
 use DomainShop\Application\PayForOrderService;
 use DomainShop\Application\RegisterDomainName;
+use DomainShop\Application\SetPriceService;
 use DomainShop\Controller\CheckAvailabilityController;
 use DomainShop\Controller\FinishController;
 use DomainShop\Controller\HomepageController;
@@ -158,8 +159,8 @@ $container[FinishController::class] = function (ContainerInterface $container) {
         $container->get(TemplateRendererInterface::class)
     );
 };
-$container[SetPriceController::class] = function () {
-    return new SetPriceController();
+$container[SetPriceController::class] = function (ContainerInterface $container) {
+    return new SetPriceController($container->get(SetPriceService::class));
 };
 
 $container[Clock::class] = function () use ($applicationEnv) {
@@ -183,6 +184,10 @@ $container[RegisterDomainName::class] = function (ContainerInterface $container)
 
 $container[PayForOrderService::class] = function () {
     return new PayForOrderService();
+};
+
+$container[SetPriceService::class] = function () {
+    return new SetPriceService();
 };
 
 return $container;
