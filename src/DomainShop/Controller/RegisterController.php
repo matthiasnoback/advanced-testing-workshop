@@ -67,7 +67,7 @@ final class RegisterController implements MiddlewareInterface
 
                 if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
                     $swap = (new Builder())
-                        ->add('fixer')
+                        ->add('fixer', ['access_key' => 'e495bd221c904b9155f76e130814d567'])
                         ->build();
                     $rate = $swap->latest($pricing->getCurrency() . '/' . $order->getPayInCurrency());
 
