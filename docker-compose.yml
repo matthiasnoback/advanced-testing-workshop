@@ -9,7 +9,7 @@ services:
         volumes:
             - ./:/opt:cached
         ports:
-            - 80:80
+            - 8081:80
         environment:
             SERVER_NAME: web
             ROOT: /opt/public/

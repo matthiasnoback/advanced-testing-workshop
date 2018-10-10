@@ -3,14 +3,10 @@ declare(strict_types=1);
 
 namespace DomainShop\Controller;
 
-use Common\Persistence\Database;
-use DomainShop\Application\ExchangeRateProvider;
-use DomainShop\Domain\Clock;
+use DomainShop\Application\RegisterDomainName;
 use DomainShop\Entity\Order;
-use DomainShop\Entity\Pricing;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Swap\Builder;
 use Zend\Diactoros\Response\RedirectResponse;
 use Zend\Expressive\Router\RouterInterface;
 use Zend\Expressive\Template\TemplateRendererInterface;
@@ -27,17 +23,18 @@ final class RegisterController implements MiddlewareInterface
      * @var TemplateRendererInterface
      */
     private $renderer;
-    /** @var ExchangeRateProvider */
-    private $exchangeRateProvider;
+
+    /** @var RegisterDomainName */
+    private $registerDomainName;
 
     public function __construct(
         RouterInterface $router,
         TemplateRendererInterface $renderer,
-        ExchangeRateProvider $exchangeRateProvider
+        RegisterDomainName $registerDomainName
     ) {
         $this->router = $router;
         $this->renderer = $renderer;
-        $this->exchangeRateProvider = $exchangeRateProvider;
+        $this->registerDomainName = $registerDomainName;
     }
 
     public function __invoke(Request $request, Response $response, callable $out = null)
@@ -61,31 +58,13 @@ final class RegisterController implements MiddlewareInterface
             }
 
             if (empty($formErrors)) {
-                $orderId = count(Database::retrieveAll(Order::class)) + 1;
-
-                $order = new Order();
-                $order->setId($orderId);
-                $order->setDomainName($submittedData['domain_name']);
-                $order->setOwnerName($submittedData['name']);
-                $order->setOwnerEmailAddress($submittedData['email_address']);
-                $order->setPayInCurrency($submittedData['currency']);
-
-                /** @var Pricing $pricing */
-                $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
-
-                if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
-                    $rate = $this->exchangeRateProvider->getExchangeRate(
-                        $pricing->getCurrency(),
-                        $order->getPayInCurrency()
-                    );
-                    $amount = (int)round($pricing->getAmount() * $rate);
-                } else {
-                    $amount = $pricing->getAmount();
-                }
-
-                $order->setAmount($amount);
-
-                Database::persist($order);
+                /** @var Order $order */
+                $order = ($this->registerDomainName)(
+                    $submittedData['domain_name'],
+                    $submittedData['name'],
+                    $submittedData['email_address'],
+                    $submittedData['currency']
+                );
 
                 return new RedirectResponse(
                     $this->router->generateUri(
@@ -99,7 +78,7 @@ final class RegisterController implements MiddlewareInterface
         $response->getBody()->write($this->renderer->render('register.html.twig', [
             'domainName' => $submittedData['domain_name'],
             'formErrors' => $formErrors,
-            'submittedData' => $submittedData
+            'submittedData' => $submittedData,
         ]));
 
         return $response;

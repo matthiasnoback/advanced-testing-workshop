@@ -1,6 +1,7 @@
 <?php
 
 use DomainShop\Application\ExchangeRateProvider;
+use DomainShop\Application\RegisterDomainName;
 use DomainShop\Controller\CheckAvailabilityController;
 use DomainShop\Controller\FinishController;
 use DomainShop\Controller\HomepageController;
@@ -141,7 +142,7 @@ $container[RegisterController::class] = function (ContainerInterface $container)
     return new RegisterController(
         $container->get(RouterInterface::class),
         $container->get(TemplateRendererInterface::class),
-        $container->get(ExchangeRateProvider::class)
+        $container->get(RegisterDomainName::class)
     );
 };
 $container[PayController::class] = function (ContainerInterface $container) {
@@ -172,6 +173,10 @@ $container[ExchangeRateProvider::class] = function (ContainerInterface $containe
         return new FixedExchangeRate();
     }
     return new SwapFixer($container->get(Clock::class));
+};
+
+$container[RegisterDomainName::class] = function (ContainerInterface $container) {
+    return new RegisterDomainName($container->get(ExchangeRateProvider::class));
 };
 
 return $container;
