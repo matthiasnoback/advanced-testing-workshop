@@ -40,7 +40,7 @@ final class PayController implements MiddlewareInterface
         if ($request->getMethod() === 'POST') {
             $submittedData = $request->getParsedBody();
             if (isset($submittedData['pay'])) {
-                $order->setWasPaid(true);
+                $order->pay((int)round(100 * $submittedData['amount']));
                 Database::persist($order);
             }
 
@@ -53,7 +53,8 @@ final class PayController implements MiddlewareInterface
             'orderId' => $orderId,
             'domainName' => $order->getDomainName(),
             'currency' => $order->getPayInCurrency(),
-            'amount' => $order->getAmount()
+            'amount' => $order->getAmount(),
+            'amountOpen' => $order->amountOpen()
         ]));
 
         return $response;

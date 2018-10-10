@@ -31,14 +31,14 @@ final class Order
     private $payInCurrency;
 
     /**
-     * @var bool
+     * @var int
      */
-    private $wasPaid = false;
+    private $amount;
 
     /**
      * @var int
      */
-    private $amount;
+    private $amountPaid;
 
     public function id(): int
     {
@@ -80,9 +80,23 @@ final class Order
         $this->ownerEmailAddress = $ownerEmailAddress;
     }
 
+    public function pay(int $amount): void
+    {
+        if ($this->amountPaid + $amount > $this->amount) {
+            throw new \RuntimeException('Do not pay more than needed.');
+        }
+
+        $this->amountPaid += $amount;
+    }
+
+    public function amountOpen(): int
+    {
+        return $this->amount - $this->amountPaid;
+    }
+
     public function wasPaid(): bool
     {
-        return $this->wasPaid;
+        return $this->amountPaid === $this->amount;
     }
 
     public function setWasPaid(bool $wasPaid): void

@@ -18,3 +18,9 @@
 
 - Run `bin/composer.sh` to use Composer (e.g. `bin/composer.sh require symfony/var-dumper`).
 - Run `bin/run_tests.sh` to run the tests.
+
+## Cleaning up after the workshop
+
+- Run `docker-compose --rmi all -v --remove-orphans` to remove all containers for this project, their images, and their volumes.
+- Remove the project directory.
+- If you don't use Docker normally, you can shut it down or uninstall it too.

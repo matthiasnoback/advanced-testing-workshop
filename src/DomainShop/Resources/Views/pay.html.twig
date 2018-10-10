@@ -4,8 +4,10 @@
     <h2>Pay for {{ domainName }}</h2>
 
     <h3>Amount: <b>{{ currency }} {{ (amount / 100)|number_format(2) }}</b></h3>
+    <h3>Amount open: <b>{{ currency }} {{ (amountOpen / 100)|number_format(2) }}</b></h3>
 
     <form method="post" action="{{ url('pay', { orderId: orderId }) }}" enctype="multipart/form-data">
+        <label for="amount">Pay</label> <input type="text" name="amount" id="amount" value="{{ (amountOpen / 100)|number_format(2) }}">
         <button type="submit"class="btn btn-default" name="cancel">Cancel</button>
         <button type="submit"class="btn btn-primary" name="pay">Pay</button>
     </form>
