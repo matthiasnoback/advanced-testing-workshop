@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace DomainShop\Controller;
 
 use Common\Persistence\Database;
+use DomainShop\Domain\Clock;
 use DomainShop\Entity\Order;
 use DomainShop\Entity\Pricing;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -26,10 +27,14 @@ final class RegisterController implements MiddlewareInterface
      */
     private $renderer;
 
-    public function __construct(RouterInterface $router, TemplateRendererInterface $renderer)
+    /** @var Clock */
+    private $clock;
+
+    public function __construct(RouterInterface $router, TemplateRendererInterface $renderer, Clock $clock)
     {
         $this->router = $router;
         $this->renderer = $renderer;
+        $this->clock = $clock;
     }
 
     public function __invoke(Request $request, Response $response, callable $out = null)
@@ -69,7 +74,10 @@ final class RegisterController implements MiddlewareInterface
                     $swap = (new Builder())
                         ->add('fixer', ['access_key' => 'e495bd221c904b9155f76e130814d567'])
                         ->build();
-                    $rate = $swap->latest($pricing->getCurrency() . '/' . $order->getPayInCurrency());
+                    $rate = $swap->historical(
+                        $pricing->getCurrency() . '/' . $order->getPayInCurrency(),
+                        $this->clock->getCurrentTime()
+                    );
 
                     $amount = (int)round($pricing->getAmount() * $rate->getValue());
                 } else {

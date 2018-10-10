@@ -6,6 +6,9 @@ use DomainShop\Controller\HomepageController;
 use DomainShop\Controller\PayController;
 use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
+use DomainShop\Domain\Clock;
+use DomainShop\Infrastructure\FixedClock;
+use DomainShop\Infrastructure\SystemClock;
 use DomainShop\Resources\Views\TwigTemplates;
 use Interop\Container\ContainerInterface;
 use Symfony\Component\Debug\Debug;
@@ -134,7 +137,8 @@ $container[CheckAvailabilityController::class] = function (ContainerInterface $c
 $container[RegisterController::class] = function (ContainerInterface $container) {
     return new RegisterController(
         $container->get(RouterInterface::class),
-        $container->get(TemplateRendererInterface::class)
+        $container->get(TemplateRendererInterface::class),
+        $container->get(Clock::class)
     );
 };
 $container[PayController::class] = function (ContainerInterface $container) {
@@ -150,6 +154,14 @@ $container[FinishController::class] = function (ContainerInterface $container) {
 };
 $container[SetPriceController::class] = function () {
     return new SetPriceController();
+};
+
+$container[Clock::class] = function () use ($applicationEnv) {
+    if ('testing' === $applicationEnv) {
+        return new FixedClock();
+    }
+
+    return new SystemClock();
 };
 
 return $container;

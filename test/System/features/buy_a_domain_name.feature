@@ -48,4 +48,4 @@ Feature:
       | Pay in currency | USD                       |
     And I press "Buy this domain name"
     Then I should see "Pay for totallyrandomdomainname.com"
-    And I should see "Amount: USD 11.56"
+    And I should see "Amount: USD 11.51"
