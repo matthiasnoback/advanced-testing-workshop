@@ -18,6 +18,7 @@ use DomainShop\Infrastructure\FileSystemPricingRepository;
 use DomainShop\Infrastructure\FixedClock;
 use DomainShop\Infrastructure\FixedExchangeRate;
 use DomainShop\Infrastructure\InMemoryOrderRepository;
+use DomainShop\Infrastructure\InMemoryPricingRepository;
 use DomainShop\Infrastructure\SwapFixer;
 use DomainShop\Infrastructure\SystemClock;
 use DomainShop\Resources\Views\TwigTemplates;
@@ -43,10 +44,10 @@ $applicationEnv = getenv('APPLICATION_ENV') ?: 'development';
 $container['config'] = [
     'middleware_pipeline' => [
         'routing' => [
-            'middleware' => array(
+            'middleware' => [
                 ApplicationFactory::ROUTING_MIDDLEWARE,
                 ApplicationFactory::DISPATCH_MIDDLEWARE,
-            ),
+            ],
             'priority' => 1,
         ],
         [
@@ -58,60 +59,60 @@ $container['config'] = [
     'final_handler' => [
         'options' => [
             'env' => $applicationEnv,
-            'onerror' => function(\Throwable $throwable) {
-                error_log((string)$throwable);
-            }
-        ]
+            'onerror' => function (\Throwable $throwable) {
+                error_log((string) $throwable);
+            },
+        ],
     ],
     'templates' => [
         'extension' => 'html.twig',
         'paths' => [
-            TwigTemplates::getPath()
-        ]
+            TwigTemplates::getPath(),
+        ],
     ],
     'twig' => [
         'globals' => [
-            'applicationEnv' => $applicationEnv
-        ]
+            'applicationEnv' => $applicationEnv,
+        ],
     ],
     'routes' => [
         [
             'name' => 'homepage',
             'path' => '/',
             'middleware' => HomepageController::class,
-            'allowed_methods' => ['GET']
+            'allowed_methods' => ['GET'],
         ],
         [
             'name' => 'check_availability',
             'path' => '/check-availability',
             'middleware' => CheckAvailabilityController::class,
-            'allowed_methods' => ['POST']
+            'allowed_methods' => ['POST'],
         ],
         [
             'name' => 'register',
             'path' => '/register',
             'middleware' => RegisterController::class,
-            'allowed_methods' => ['POST']
+            'allowed_methods' => ['POST'],
         ],
         [
             'name' => 'pay',
             'path' => '/pay/{orderId}',
             'middleware' => PayController::class,
-            'allowed_methods' => ['GET', 'POST']
+            'allowed_methods' => ['GET', 'POST'],
         ],
         [
             'name' => 'finish',
             'path' => '/finish/{orderId}',
             'middleware' => FinishController::class,
-            'allowed_methods' => ['GET']
+            'allowed_methods' => ['GET'],
         ],
         [
             'name' => 'set_price',
             'path' => '/set-price',
             'middleware' => SetPriceController::class,
-            'allowed_methods' => ['POST']
+            'allowed_methods' => ['POST'],
         ],
-    ]
+    ],
 ];
 
 /*
@@ -121,7 +122,7 @@ $container[RouterInterface::class] = function () {
     return new FastRouteRouter();
 };
 $container[Application::class] = new ApplicationFactory();
-$container[NotFoundHandler::class] = function() {
+$container[NotFoundHandler::class] = function () {
     return new NotFoundHandler(new Response());
 };
 
@@ -180,6 +181,7 @@ $container[ExchangeRateProvider::class] = function (ContainerInterface $containe
     if ('testing' === $applicationEnv) {
         return new FixedExchangeRate();
     }
+
     return new SwapFixer($container->get(Clock::class));
 };
 
@@ -191,12 +193,16 @@ $container[RegisterDomainName::class] = function (ContainerInterface $container)
     );
 };
 
-$container[PricingRepository::class] = function () {
+$container[PricingRepository::class] = function () use ($applicationEnv) {
+    if ('testing' === $applicationEnv) {
+        return new InMemoryPricingRepository();
+    }
+
     return new FileSystemPricingRepository();
 };
 
-$container[PayForOrderService::class] = function () {
-    return new PayForOrderService();
+$container[PayForOrderService::class] = function (ContainerInterface $container) {
+    return new PayForOrderService($container->get(OrderRepository::class));
 };
 
 $container[SetPriceService::class] = function (ContainerInterface $container) {
@@ -209,6 +215,7 @@ $container[OrderRepository::class] = function () use ($applicationEnv) {
     if ('testing' === $applicationEnv) {
         return new InMemoryOrderRepository();
     }
+
     return new FileSystemOrderRepository();
 };
 

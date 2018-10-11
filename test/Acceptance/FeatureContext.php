@@ -9,6 +9,7 @@ use DomainShop\Application\ExchangeRateProvider;
 use DomainShop\Application\PayForOrderService;
 use DomainShop\Application\RegisterDomainName;
 use DomainShop\Application\SetPriceService;
+use DomainShop\Domain\OrderRepository;
 use DomainShop\Entity\Order;
 use DomainShop\Infrastructure\FixedExchangeRate;
 use PHPUnit\Framework\Assert;
@@ -55,7 +56,7 @@ final class FeatureContext implements Context
      */
     public function theOrderWasPaid()
     {
-        $order = Database::retrieve(Order::class, $this->orderId);
+        $order = $this->container->get(OrderRepository::class)->retrieve($this->orderId);
 
         Assert::assertTrue($order->wasPaid());
     }
