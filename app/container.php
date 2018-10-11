@@ -12,7 +12,9 @@ use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
 use DomainShop\Domain\Clock;
 use DomainShop\Domain\OrderRepository;
+use DomainShop\Domain\PricingRepository;
 use DomainShop\Infrastructure\FileSystemOrderRepository;
+use DomainShop\Infrastructure\FileSystemPricingRepository;
 use DomainShop\Infrastructure\FixedClock;
 use DomainShop\Infrastructure\FixedExchangeRate;
 use DomainShop\Infrastructure\InMemoryOrderRepository;
@@ -184,16 +186,23 @@ $container[ExchangeRateProvider::class] = function (ContainerInterface $containe
 $container[RegisterDomainName::class] = function (ContainerInterface $container) {
     return new RegisterDomainName(
         $container->get(ExchangeRateProvider::class),
-        $container->get(OrderRepository::class)
+        $container->get(OrderRepository::class),
+        $container->get(PricingRepository::class)
     );
+};
+
+$container[PricingRepository::class] = function () {
+    return new FileSystemPricingRepository();
 };
 
 $container[PayForOrderService::class] = function () {
     return new PayForOrderService();
 };
 
-$container[SetPriceService::class] = function () {
-    return new SetPriceService();
+$container[SetPriceService::class] = function (ContainerInterface $container) {
+    return new SetPriceService(
+        $container->get(PricingRepository::class)
+    );
 };
 
 $container[OrderRepository::class] = function () use ($applicationEnv) {

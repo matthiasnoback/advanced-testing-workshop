@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace DomainShop\Application;
 use Common\Persistence\Database;
+use DomainShop\Domain\PricingRepository;
 use DomainShop\Entity\Pricing;
 
 /**
@@ -20,6 +21,14 @@ use DomainShop\Entity\Pricing;
  */
 class SetPriceService
 {
+    /** @var PricingRepository */
+    private $pricingRepository;
+
+    public function __construct(PricingRepository $pricingRepository)
+    {
+        $this->pricingRepository = $pricingRepository;
+    }
+
     public function __invoke(string $extension, string $currency, int $amount): void
     {
         try {
@@ -32,6 +41,6 @@ class SetPriceService
         $pricing->setCurrency($currency);
         $pricing->setAmount($amount);
 
-        Database::persist($pricing);
+        $this->pricingRepository->persist($pricing);
     }
 }

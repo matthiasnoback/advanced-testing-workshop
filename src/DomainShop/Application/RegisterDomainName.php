@@ -2,10 +2,10 @@
 
 namespace DomainShop\Application;
 
-use Common\Persistence\Database;
 use DomainShop\Domain\OrderRepository;
+use DomainShop\Domain\PricingRepository;
 use DomainShop\Entity\Order;
-use DomainShop\Entity\Pricing;
+use DomainShop\Infrastructure\FileSystemPricingRepository;
 
 class RegisterDomainName
 {
@@ -13,11 +13,17 @@ class RegisterDomainName
     private $exchangeRateProvider;
     /** @var OrderRepository */
     private $orderRepository;
+    /** @var PricingRepository */
+    private $pricingRepository;
 
-    public function __construct(ExchangeRateProvider $exchangeRateProvider, OrderRepository $orderRepository)
-    {
+    public function __construct(
+        ExchangeRateProvider $exchangeRateProvider,
+        OrderRepository $orderRepository,
+        PricingRepository $pricingRepository
+    ) {
         $this->exchangeRateProvider = $exchangeRateProvider;
         $this->orderRepository = $orderRepository;
+        $this->pricingRepository = $pricingRepository;
     }
 
     public function __invoke(string $domainName, string $name, string $emailAddress, string $currency): Order
@@ -30,8 +36,7 @@ class RegisterDomainName
         $order->setOwnerEmailAddress($emailAddress);
         $order->setPayInCurrency($currency);
 
-        /** @var Pricing $pricing */
-        $pricing = Database::retrieve(Pricing::class, $order->getDomainNameExtension());
+        $pricing = $this->pricingRepository->retrieve($order->getDomainNameExtension());
 
         if ($order->getPayInCurrency() !== $pricing->getCurrency()) {
             $rate = $this->exchangeRateProvider->getExchangeRate(
