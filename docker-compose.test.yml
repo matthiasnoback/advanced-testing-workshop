@@ -3,7 +3,7 @@ version: '3'
 services:
     php-fpm:
         environment:
-            APPLICATION_ENV: testing
-            CODE_COVERAGE_ENABLED: "1"
+            APPLICATION_ENV: system
+            CODE_COVERAGE_ENABLED: "0"
             # Add any other test-specific environment variable here, e.g.
             #SERVER_TIME: "2017-11-07 10:00:00"

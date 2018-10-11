@@ -3,6 +3,7 @@
 namespace DomainShop\Application;
 
 use Common\Persistence\Database;
+use DomainShop\Domain\OrderRepository;
 use DomainShop\Entity\Order;
 use DomainShop\Entity\Pricing;
 
@@ -10,15 +11,18 @@ class RegisterDomainName
 {
     /** @var ExchangeRateProvider */
     private $exchangeRateProvider;
+    /** @var OrderRepository */
+    private $orderRepository;
 
-    public function __construct(ExchangeRateProvider $exchangeRateProvider)
+    public function __construct(ExchangeRateProvider $exchangeRateProvider, OrderRepository $orderRepository)
     {
         $this->exchangeRateProvider = $exchangeRateProvider;
+        $this->orderRepository = $orderRepository;
     }
 
     public function __invoke(string $domainName, string $name, string $emailAddress, string $currency): Order
     {
-        $orderId = count(Database::retrieveAll(Order::class)) + 1;
+        $orderId = $this->orderRepository->nextId();
         $order = new Order();
         $order->setId($orderId);
         $order->setDomainName($domainName);
@@ -41,7 +45,7 @@ class RegisterDomainName
 
         $order->setAmount($amount);
 
-        Database::persist($order);
+        $this->orderRepository->persist($order);
 
         return $order;
     }

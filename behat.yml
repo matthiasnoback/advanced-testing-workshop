@@ -21,4 +21,4 @@ default:
             paths: [ "%paths.base%/test/System/features"]
             contexts:
                 - Test\System\FeatureContext
-            remote_coverage_enabled: true
+            remote_coverage_enabled: false

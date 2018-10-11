@@ -11,8 +11,11 @@ use DomainShop\Controller\PayController;
 use DomainShop\Controller\RegisterController;
 use DomainShop\Controller\SetPriceController;
 use DomainShop\Domain\Clock;
+use DomainShop\Domain\OrderRepository;
+use DomainShop\Infrastructure\FileSystemOrderRepository;
 use DomainShop\Infrastructure\FixedClock;
 use DomainShop\Infrastructure\FixedExchangeRate;
+use DomainShop\Infrastructure\InMemoryOrderRepository;
 use DomainShop\Infrastructure\SwapFixer;
 use DomainShop\Infrastructure\SystemClock;
 use DomainShop\Resources\Views\TwigTemplates;
@@ -164,14 +167,14 @@ $container[SetPriceController::class] = function (ContainerInterface $container)
 };
 
 $container[Clock::class] = function () use ($applicationEnv) {
-    if ('testing' === $applicationEnv) {
+    if ('testing' === $applicationEnv || 'system' === $applicationEnv) {
         return new FixedClock();
     }
 
     return new SystemClock();
 };
 
-$container[ExchangeRateProvider::class] = function (ContainerInterface $container) use ($applicationEnv){
+$container[ExchangeRateProvider::class] = function (ContainerInterface $container) use ($applicationEnv) {
     if ('testing' === $applicationEnv) {
         return new FixedExchangeRate();
     }
@@ -179,7 +182,10 @@ $container[ExchangeRateProvider::class] = function (ContainerInterface $containe
 };
 
 $container[RegisterDomainName::class] = function (ContainerInterface $container) {
-    return new RegisterDomainName($container->get(ExchangeRateProvider::class));
+    return new RegisterDomainName(
+        $container->get(ExchangeRateProvider::class),
+        $container->get(OrderRepository::class)
+    );
 };
 
 $container[PayForOrderService::class] = function () {
@@ -188,6 +194,13 @@ $container[PayForOrderService::class] = function () {
 
 $container[SetPriceService::class] = function () {
     return new SetPriceService();
+};
+
+$container[OrderRepository::class] = function () use ($applicationEnv) {
+    if ('testing' === $applicationEnv) {
+        return new InMemoryOrderRepository();
+    }
+    return new FileSystemOrderRepository();
 };
 
 return $container;
